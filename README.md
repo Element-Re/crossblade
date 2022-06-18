@@ -7,7 +7,7 @@ For clarity's sake, it's best to start by defining some terms.
 * **Playlist Sound:** A single sound entry of a playlist. 
 * **Audio Source:** A reference to an audio file. Each playlist sound is associated with one.
 * **Sound Layer:** This is a concept unique to Crossblade. A sound layer defines both its own unique audio source as well as a number of events that can trigger it. By default, Crossblade considers the playlist sounds's main audio source to be one layer, but additional layers can be added.
-* **Crossblade Event:** A trigger that can change which sounds are currently playing.
+* **Crossblade Event:** A trigger that can change which sound layers are currently audible.
 ## Usage
 The following is a detailed example of a simple use case: The GM has two tracks that represent the same song in two different tonal variations.
 * *Gathering Clouds (Precipitation)*
@@ -37,12 +37,9 @@ Crossblade uses the fade duration on the playlist sound or playlist when fading 
 ### Sound Layer Configuration
 There are two ways to access the Sound Layer Configuration dialog for a playlist sound: either from the right-click context menu for the playlist sound on the sidebar, or in the header of the playlist sound configuration dialog.
 ## Event Types
-### Default
-This event will trigger if no other, better event applies. By default, Crossblade will consider the main audio source for a playlist sound to be treated as a sound layer with a Default event trigger.
-### Disposition
-These will only trigger during combat, based on the disposition of the current combatant.
-### Game Paused
-This event will trigger when the game is paused. A setting controls whether or not this event can trigger during combat. In addition to the Module Settings tab of the Configure Game Settings dialog, there is a button to toggle this setting on and off and in the Ambient Sound Controls menu on the left side of the game window.
+* **Default:** This event will trigger if no other, better event applies. By default, Crossblade will consider the main audio source for a playlist sound to be treated as a sound layer with a Default event trigger.
+* **Disposition:** These will only trigger during combat, based on the disposition of the current combatant.
+* **Game Paused:** This event will trigger when the game is paused. A setting controls whether or not this event can trigger during combat. In addition to the Module Settings tab of the Configure Game Settings dialog, there is a button to toggle this setting on and off and in the Ambient Sound Controls menu on the left side of the game window.
 ## Additional Features
 Crossblade adds a right-click context menu option to playlists to automatically preload all playlist sounds and sound layers for that playlist for all connected clients, rather than having to preload each playlist sound one-by-one. Depending on the number of playlist sounds and layers, and the clients' connections this could take quite a while.
 
