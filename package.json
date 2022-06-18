@@ -1,0 +1,59 @@
+{
+  "private": true,
+  "name": "crossblade",
+  "description": "Crossfades between multiple layered tracks during combat",
+  "license": "MIT",
+  "homepage": "https://github.com/Elemental-Re/crossblade",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elemental-Re/crossblade"
+  },
+  "bugs": {
+    "url": "https://github.com/Elemental-Re/crossblade/issues"
+  },
+  "contributors": [
+    {
+      "name": "Elemental_Re"
+    }
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "gulp build",
+    "build:watch": "gulp watch",
+    "link-project": "gulp link",
+    "clean": "gulp clean",
+    "clean:link": "gulp link --clean",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --ext .ts,.js,.cjs .",
+    "lint:fix": "eslint --ext .ts,.js,.cjs --fix .",
+    "format": "prettier --write \"./**/*.(ts|js|cjs|json|yml|css)\"",
+    "postinstall": "husky install"
+  },
+  "devDependencies": {
+    "@league-of-foundry-developers/foundry-vtt-types": "^9.268.0",
+    "@rollup/plugin-node-resolve": "^13.2.1",
+    "@rollup/plugin-typescript": "^8.3.2",
+    "@rollup/stream": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
+    "@typescript-eslint/parser": "^5.21.0",
+    "eslint": "^8.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "fs-extra": "^10.1.0",
+    "gulp": "^4.0.2",
+    "gulp-sourcemaps": "^3.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.4.1",
+    "prettier": "^2.6.2",
+    "rollup": "^2.71.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0",
+    "yargs": "^17.4.1"
+  },
+  "lint-staged": {
+    "*.(ts|js|cjs)": "eslint --fix",
+    "*.(json|yml|css)": "prettier --write"
+  }
+}

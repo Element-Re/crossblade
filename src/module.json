@@ -1,0 +1,42 @@
+{
+  "name": "crossblade",
+  "title": "Crossblade - Adaptive Music for Combat and More",
+  "description": "Enables the GM to configure adaptive music playlist sounds that crossfade between multiple sound layers in response to combat and more",
+  "version": "This is auto replaced",
+  "author": "Elemental_Re",
+  "authors": [
+    {
+      "name": "Elemental_Re"
+    }
+  ],
+  "minimumCoreVersion": "9",
+  "compatibleCoreVersion": "9",
+  "scripts": [],
+  "esmodules": ["module/crossblade.js"],
+  "styles": ["styles/crossblade.css"],
+  "packs": [],
+  "dependencies": [
+    {
+      "name": "lib-wrapper"
+    },
+    {
+      "name": "socketlib"
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "socket": true,
+  "url": "This is auto replaced",
+  "manifest": "This is auto replaced",
+  "download": "This is auto replaced",
+  "license": "MIT",
+  "readme": "https://github.com/Elemental-Re/crossblade/blob/main/README.md",
+  "bugs": "https://github.com/Elemental-Re/crossblade/issues",
+  "system": [],
+  "library": false
+}
