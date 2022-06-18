@@ -7,7 +7,7 @@ For clarity's sake, it's best to start by defining some terms.
 * **Playlist Sound:** A single sound entry of a playlist. 
 * **Audio Source:** A reference to an audio file. Each playlist sound is associated with one.
 * **Sound Layer:** This is a concept unique to Crossblade. A sound layer defines both its own unique audio source as well as a number of events that can trigger it. By default, Crossblade considers the playlist sounds's main audio source to be one layer, but additional layers can be added.
-* **Crossblade Event:** A trigger that can change which sounds are currently playing.
+* **Crossblade Event:** A trigger that can change which sound layers are currently audible.
 ## Usage
 The following is a detailed example of a simple use case: The GM has two tracks that represent the same song in two different tonal variations.
 * *Gathering Clouds (Precipitation)*
