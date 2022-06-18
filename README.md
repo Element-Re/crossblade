@@ -2,13 +2,11 @@
 Crossblade is an audio module that enables the GM to define playlist sounds that crossfade in and out between simultaneously playing multi-layered tracks based on triggers. The result is an [adaptive music](https://en.wikipedia.org/wiki/Adaptive_music) soundtrack that responds dynamically to the game's state, such as the ebb and flow of a combat encounter.
 ## Terminology
 For clarity's sake, it's best to start by defining some terms.
-###
-Core Foundry Terms
+### Core Foundry Terms
 * **Playlist:** A container for a set of Playlist Sounds which defines how they should be played.
 * **Playlist Sound:** A single sound entry of a playlist. 
 * **Audio Source:** A reference to an audio file. Each playlist sound is associated with one.
-###
-Crossblade-Specific Terms
+### Crossblade-Specific Terms
 * **Sound Layer:** A sound layer defines both its own unique audio source as well as a number of events that can trigger it. By default, Crossblade considers the playlist sounds's main audio source to be one layer, but additional layers can be added.
 * **Crossblade Event:** A trigger that can change which sound layers are currently audible.
 ## Usage
