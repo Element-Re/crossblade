@@ -53,6 +53,10 @@ export default class CrossbladeSoundConfig<
     if (this.isEditable) {
       html.find('.crossblade-layer-control').on('click', this._onCrossbladeLayerControl.bind(this));
     }
+    html.find('.crossblade-help').on('click', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+    });
   }
 
   protected async _onCrossbladeLayerControl(event: Event) {
@@ -84,6 +88,7 @@ export default class CrossbladeSoundConfig<
       debug('deleting Layer...');
       const layerContainer = a.closest('.crossblade-sound-layer');
       layerContainer?.remove();
+      this.setPosition({ height: 'auto' });
     }
   }
 

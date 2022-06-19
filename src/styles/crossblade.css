@@ -41,3 +41,17 @@
   text-rendering: auto;
   line-height: 1;
 }
+
+.crossblade-events label.form-check-label {
+  display: block;
+}
+
+.crossblade-events input.form-check-input {
+  vertical-align: middle;
+  position: relative;
+  bottom: 1px;
+}
+
+a.crossblade-help {
+  cursor: help;
+}

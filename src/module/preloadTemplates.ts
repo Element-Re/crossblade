@@ -5,7 +5,6 @@ export async function preloadTemplates(): Promise<Handlebars.TemplateDelegate[]>
   const templatePaths: string[] = [
     // Templates
     'modules/crossblade/templates/crossblade-sound-config.hbs',
-    'modules/crossblade/templates/crossblade-sound-config-section.hbs',
     'modules/crossblade/templates/crossblade-sound-layer.hbs',
   ];
 

@@ -18,9 +18,10 @@
         <div class="crossblade-events">
             {{#each crossbladeEvents}}
                 <div class='form-check form-check-inline' title='{{localize this.description}}'>
-                    <input class='form-check-input' type='checkbox' id='crossblade_soundLayers_{{../index}}_events_{{@key}}' name='flags.crossblade.soundLayers.{{../index}}.events' value='{{@key}}'
-                    />
-                    <label class='form-check-label' for='crossblade_soundLayers_{{../index}}_events_{{@key}}'>{{localize this.label}}</label>
+                    <label class='form-check-label'></label>
+                        <input class='form-check-input' type='checkbox' name='flags.crossblade.soundLayers.{{../index}}.events' value='{{@key}}' />
+                        {{localize this.label}}
+                    </label>
                 </div>
             {{/each}}
         </div>
