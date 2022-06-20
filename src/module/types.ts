@@ -12,8 +12,8 @@ export interface PlaylistSoundUpdateData {
 }
 
 export abstract class CrossbladePlaylistSound extends PlaylistSound {
-  crossbladeSounds?: Map<CrossbladeEventKey, Sound[]>;
-  protected _crossbladeSounds?: Map<CrossbladeEventKey, Sound[]>;
+  crossbladeSounds?: Map<CrossbladeEventKey, Set<Sound>>;
+  protected _crossbladeSounds?: Map<CrossbladeEventKey, Set<Sound>>;
 }
 
 export interface SoundLayer {

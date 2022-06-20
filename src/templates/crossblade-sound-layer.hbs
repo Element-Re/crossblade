@@ -1,6 +1,6 @@
 <div class="crossblade-sound-layer" data-layer="{{index}}">
     <h4>
-        🔊{{ localize "CROSSBLADE.Sound.Layer.Header" }}
+        🔊{{ localize "CROSSBLADE.Sound.Layer.Name" }}
         <a class="crossblade-layer-control delete-layer" title="{{localize 'CROSSBLADE.Sound.Layer.Remove'}}">
             <i class="fas fa-minus"></i>
         </a>
@@ -16,14 +16,14 @@
     <div class="form-group row">
         <label>{{localize "CROSSBLADE.Sound.Layer.EventTrigger"}}</label>
         <div class="crossblade-events">
-            {{#each crossbladeEvents}}
-                <div class='form-check form-check-inline' title='{{localize this.description}}'>
-                    <label class='form-check-label'></label>
-                        <input class='form-check-input' type='checkbox' name='flags.crossblade.soundLayers.{{../index}}.events' value='{{@key}}' />
-                        {{localize this.label}}
-                    </label>
-                </div>
-            {{/each}}
+        {{#each crossbladeEvents}}
+            <div class='form-check form-check-inline' title='{{localize this.description}}'>
+                <label class='form-check-label'></label>
+                    <input class='form-check-input' type='checkbox' name='flags.crossblade.soundLayers.{{../index}}.events' value='{{@key}}' />
+                    {{localize this.label}}
+                </label>
+            </div>
+        {{/each}}
         </div>
     </div>
 </div>

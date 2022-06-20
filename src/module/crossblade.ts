@@ -15,6 +15,7 @@ import {
   CrossbladeController,
   crossfadePlaylistsSocket,
   isLeadGM,
+  getUniqueSounds,
 } from './utils';
 import { DevModeApi, CrossbladePlaylistSound } from './types';
 import { PlaylistDirectoryOverrides, PlaylistOverrides, PlaylistSoundOverrides } from './overrides';
@@ -103,15 +104,13 @@ Hooks.on(
         icon: '<i class="fas fa-download fa-fw"></i>',
         callback: async function (target: JQuery): Promise<void> {
           const playlist = game.playlists?.get(target.data('document-id'));
-          playlist?.sounds.forEach((s: CrossbladePlaylistSound) => {
-            if (s.sound) {
-              AudioHelper.preloadSound(s.sound.src);
-              if (s.crossbladeSounds) {
-                Array.from(s.crossbladeSounds.values())
-                  .flat()
-                  .forEach((cbs) => {
-                    AudioHelper.preloadSound(cbs.src);
-                  });
+          playlist?.sounds.forEach((pls: CrossbladePlaylistSound) => {
+            if (pls.sound) {
+              AudioHelper.preloadSound(pls.sound.src);
+              if (pls.crossbladeSounds) {
+                getUniqueSounds(pls).forEach((cbs) => {
+                  AudioHelper.preloadSound(cbs.src);
+                });
               }
             }
           });

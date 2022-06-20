@@ -69,19 +69,21 @@ export function getCrossbladeEvent(): CrossbladeEventKey | null {
 }
 
 export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, volume: number = pls.volume) {
-  const crossbladeEvent = CrossbladeController.getCurrentEvent();
+  let crossbladeEvent = CrossbladeController.getCurrentEvent();
   const crossbladeSounds = pls.crossbladeSounds;
   // Default volume --- Only activate if this is the base sound;
   let fadeVolume = pls.sound?.id === sound.id ? volume : 0;
   // If crossblade is enabled and if there's a current event and crossblade is initialized for this PlaylistSound
   if (game.settings.get(MODULE_ID, 'enable') === true && crossbladeEvent && crossbladeSounds) {
-    const currentEventSounds = new Set(crossbladeSounds.get(crossbladeEvent));
+    // Default event if there's no sounds for this event.
+    if (!crossbladeSounds.get(crossbladeEvent)?.size) {
+      crossbladeEvent = 'DEFAULT';
+    }
+    const currentEventSounds = crossbladeSounds.get(crossbladeEvent) || new Set();
     const otherEventSounds = new Set(
-      Array.from(crossbladeSounds.entries())
-        .filter((entry) => entry[0] !== crossbladeEvent)
-        .map((entry) => entry[1])
-        .flat(),
+      ...[...crossbladeSounds.entries()].filter((entry) => entry[0] !== crossbladeEvent).map((entry) => entry[1]),
     );
+
     // If this event has sounds
     if (currentEventSounds.size) {
       if (currentEventSounds.has(sound)) {
@@ -95,9 +97,7 @@ export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, v
 }
 
 export function getUniqueSounds(pls: CrossbladePlaylistSound): Set<Sound> {
-  const sounds = pls.sound ? [pls.sound] : [];
-  const crossbladeSounds = pls.crossbladeSounds ? Array.from(pls.crossbladeSounds.values()).flat() : [];
-  return new Set(sounds.concat(crossbladeSounds));
+  return new Set<Sound>(...[...(pls.crossbladeSounds?.values() ?? [])]);
 }
 
 export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
@@ -113,7 +113,7 @@ export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
 
 export function generateCrossbladeSounds(pls: PlaylistSound) {
   debug('generateCrossbladeSounds');
-  const crossbladeSounds = new Map<CrossbladeEventKey, Sound[]>();
+  const crossbladeSounds = new Map<CrossbladeEventKey, Set<Sound>>();
 
   const soundLayers = pls.getFlag('crossblade', 'soundLayers') as SoundLayer[] | undefined;
   debug('soundLayers', soundLayers);
@@ -123,8 +123,8 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
         const layerSound = createCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
           sl.events.forEach((e) => {
-            const eventSounds = crossbladeSounds.get(e) ?? [];
-            crossbladeSounds.set(e, eventSounds.concat(layerSound));
+            const eventSounds = crossbladeSounds.get(e) ?? new Set();
+            crossbladeSounds.set(e, eventSounds.add(layerSound));
           });
         }
       }

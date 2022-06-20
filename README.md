@@ -3,7 +3,7 @@ Crossblade is an audio module that enables the GM to define playlist sounds that
 ## Terminology
 For clarity's sake, it's best to start by defining some terms.
 ### Core Foundry Terms
-* **Playlist:** A container for a set of Playlist Sounds which defines how they should be played.
+* **Playlist:** A container for a set of sounds which defines how they should be played.
 * **Playlist Sound:** A single sound entry of a playlist. 
 * **Audio Source:** A reference to an audio file. Each playlist sound is associated with one.
 ### Crossblade-Specific Terms
@@ -18,12 +18,17 @@ The following is a detailed example of a simple use case: The GM has two tracks 
 
 The GM creates a "Battle" playlist and then adds a playlist sound underneath it, setting the audio source to the *Gathering Clouds (Precipitation)* file. So far this is standard Foundry configuration for a new playlist and playlist sound.
 
-![Playlist Config](/src/assets/readme/Playlist%20Config.webp "Playlist Configuration")
 ![Playlist Sound Config](/src/assets/readme/Playlist%20Sound%20Config.webp "Playlist Sound Configuration")
 
-Next the GM opens the Crossblade sound layer configuration dialog by right clicking on the playlist sound and selecting "Configure Sound Layers". The GM adds a single layer by clicking the '+' icon in the upper right of the dialog, setting the source of the new sound layer to the *Gathering Clouds (Storm)* file. Lastly, the GM selects the Disposition: Hostile event for the sound's event trigger.
+Next the GM opens the Crossblade sound layer configuration dialog by right clicking on the playlist sound and selecting "Configure Sound Layers".
 
-https://user-images.githubusercontent.com/86752832/174438626-7547764a-d9b5-4762-af58-2b42cde40045.mp4
+![Sound Layers Context Menu](/src/assets/readme/Context%20Menu.webp "Sound Layers Context Menu")
+
+The GM adds a single layer by clicking the '+' icon in the upper right of the dialog, setting the source of the new sound layer to the *Gathering Clouds (Storm)* file. Lastly, the GM selects the Disposition: Hostile event for the sound's event trigger.
+
+![Add Sound Layer](/src/assets/readme/Add%20Sound%20Layer.webp "Add Sound Layer")
+
+![Configure Sound Layers](/src/assets/readme/Configure%20Sound%20Layers.webp "Configure Sound Layers")
 
 With this, the playlist sound is fully configured. Crossblade will use the playlist sound's main audio source for all cases in which there isn't a sound layer with a better match. In this case the only additional layer is configured to play in combat when the current combatant has a "hostile" disposition.
 
@@ -31,6 +36,8 @@ The GM starts a combat and begins playing the newly-configured playlist sound. T
 
 ## More Advanced Usage
 Crossblade is not limited to playlist sounds with only two layers. A playlist sound can have multiple layers with their own triggering events, and each layer can be triggered by more than one event. If multiple layers are triggered by the same event, they will play simultaneously, effectively mixing together to a single blended sound.
+
+[Complex Sound Layers Example](/src/assets/readme/Complex%20Sound%20Layers.webp "Complex Sound Layers Example")
 
 You can include a sound layer that references the same file as the playlist sound's main audio source. This will allow you to configure it to play during specific events as well as when there is no other applicable event.
 ### Fade Duration
