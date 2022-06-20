@@ -1,5 +1,7 @@
 # ⚔ Crossblade - Adaptive Music for Combat and More
 Crossblade is an audio module that enables the GM to define playlist sounds that crossfade in and out between simultaneously playing multi-layered tracks based on triggers. The result is an [adaptive music](https://en.wikipedia.org/wiki/Adaptive_music) soundtrack that responds dynamically to the game's state, such as the ebb and flow of a combat encounter.
+## What does this module do?
+Do you love using music during games? Do want to wow your players with a dynamic soundtrack that responds to events in the game? Crossblade can help. Crossblade works best with music that is composed of several sound layers among multiple audio files. By configuring a sound in a playlist, Crossblade can seamlessly fade between the multiple additional sound layers automatically during the game, elevating your players' experience to new heights.
 ## Terminology
 For clarity's sake, it's best to start by defining some terms.
 ### Core Foundry Terms
