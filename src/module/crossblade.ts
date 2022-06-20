@@ -41,6 +41,7 @@ Hooks.once('init', async () => {
     'WRAPPER',
   );
   libWrapper.register(MODULE_ID, 'Playlist.prototype._onSoundStart', PlaylistOverrides._onSoundStartWrapper, 'WRAPPER');
+  libWrapper.register(MODULE_ID, 'Playlist.prototype._onDelete', PlaylistOverrides._onDeleteWrapper, 'WRAPPER');
   libWrapper.register(
     MODULE_ID,
     'PlaylistDirectory.prototype._onSoundVolume',

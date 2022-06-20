@@ -32,6 +32,11 @@ export namespace PlaylistOverrides {
 
     return result;
   }
+
+  export function _onDeleteWrapper(this: Playlist, wrapped: (...args: unknown[]) => void, ...args: unknown[]) {
+    wrapped(...args);
+    this.sounds.forEach((pls: CrossbladePlaylistSound) => getUniqueSounds(pls).forEach((s) => s.stop()));
+  }
 }
 
 function _syncSound(
@@ -82,8 +87,8 @@ export namespace PlaylistSoundOverrides {
     if (!this.sound || this.sound.failed || !this.crossbladeSounds) return;
 
     Array.from(this.crossbladeSounds.keys()).forEach((k) => {
-      this.crossbladeSounds?.get(k)?.forEach((cbs: Sound) => {
-        _syncSound(this, cbs, k);
+      this.crossbladeSounds?.get(k)?.forEach((sound: Sound) => {
+        _syncSound(this, sound, k);
       });
     });
 
