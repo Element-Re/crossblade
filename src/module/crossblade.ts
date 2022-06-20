@@ -15,7 +15,7 @@ import {
   CrossbladeController,
   crossfadePlaylistsSocket,
   isLeadGM,
-  getUniqueSounds,
+  getUniqueCrossbladeSounds,
 } from './utils';
 import { DevModeApi, CrossbladePlaylistSound } from './types';
 import { PlaylistDirectoryOverrides, PlaylistOverrides, PlaylistSoundOverrides } from './overrides';
@@ -109,7 +109,7 @@ Hooks.on(
             if (pls.sound) {
               AudioHelper.preloadSound(pls.sound.src);
               if (pls.crossbladeSounds) {
-                getUniqueSounds(pls).forEach((cbs) => {
+                getUniqueCrossbladeSounds(pls).forEach((cbs) => {
                   AudioHelper.preloadSound(cbs.src);
                 });
               }

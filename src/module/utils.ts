@@ -76,10 +76,10 @@ export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, v
   // If crossblade is enabled and if there's a current event and crossblade is initialized for this PlaylistSound
   if (game.settings.get(MODULE_ID, 'enable') === true && crossbladeEvent && crossbladeSounds) {
     // Default event if there's no sounds for this event.
-    if (!crossbladeSounds.get(crossbladeEvent)?.size) {
+    if (!crossbladeSounds.get(crossbladeEvent)?.length) {
       crossbladeEvent = 'DEFAULT';
     }
-    const currentEventSounds = crossbladeSounds.get(crossbladeEvent) || new Set();
+    const currentEventSounds = new Set(crossbladeSounds.get(crossbladeEvent) || []);
     const otherEventSounds = new Set(
       ...[...crossbladeSounds.entries()].filter((entry) => entry[0] !== crossbladeEvent).map((entry) => entry[1]),
     );
@@ -96,14 +96,14 @@ export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, v
   return fadeVolume;
 }
 
-export function getUniqueSounds(pls: CrossbladePlaylistSound): Set<Sound> {
-  return new Set<Sound>(...[...(pls.crossbladeSounds?.values() ?? [])]);
+export function getUniqueCrossbladeSounds(pls: CrossbladePlaylistSound): Set<Sound> {
+  return new Set([...(pls.crossbladeSounds?.values() ?? [])].flat());
 }
 
 export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
   const localVolume = volume * game.settings.get('core', 'globalPlaylistVolume');
   if (pls.crossbladeSounds && pls.sound) {
-    getUniqueSounds(pls).forEach(async (s) => {
+    getUniqueCrossbladeSounds(pls).forEach(async (s) => {
       s.fade(getCrossfadeVolume(pls, s, localVolume), {
         duration: PlaylistSound.VOLUME_DEBOUNCE_MS,
       });
@@ -113,7 +113,7 @@ export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
 
 export function generateCrossbladeSounds(pls: PlaylistSound) {
   debug('generateCrossbladeSounds');
-  const crossbladeSounds = new Map<CrossbladeEventKey, Set<Sound>>();
+  const crossbladeSounds = new Map<CrossbladeEventKey, Sound[]>();
 
   const soundLayers = pls.getFlag('crossblade', 'soundLayers') as SoundLayer[] | undefined;
   debug('soundLayers', soundLayers);
@@ -123,8 +123,8 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
         const layerSound = createCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
           sl.events.forEach((e) => {
-            const eventSounds = crossbladeSounds.get(e) ?? new Set();
-            crossbladeSounds.set(e, eventSounds.add(layerSound));
+            const eventSounds = crossbladeSounds.get(e) ?? [];
+            crossbladeSounds.set(e, eventSounds.concat(layerSound));
           });
         }
       }
@@ -314,10 +314,15 @@ export class CrossbladeController {
       if (cbps.crossbladeSounds && cbps.sound) {
         log('Handling crossfade for', `🎵${pls.name}🎵`);
         if (!cbps.sound.loaded) await cbps.sound.load();
-        const uniqueSounds = getUniqueSounds(pls);
+        const uniqueSounds = getUniqueCrossbladeSounds(pls);
         // Ensure all crossblade sounds are loaded before attempting crossfade...
         await Promise.all([...uniqueSounds].map(async (s) => await s.load()));
-
+        // TODO: pls.sound is a different object reference than any of the sound layers
+        // This can theoretically lead to the same audio source being crossfaded twice
+        // but currently it's necessary for all layers to crossfade properly when one
+        // of the layers has the same audio source as the base playlist sound.
+        // It would be better if we could ensure pls.sound was a singleton like the
+        // rest of the layers...
         if (pls.sound) uniqueSounds.add(pls.sound);
         uniqueSounds.forEach((s) => {
           s.fade(getCrossfadeVolume(pls, s), { duration: pls.fadeDuration });

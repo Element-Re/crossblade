@@ -1,6 +1,6 @@
 import CrossbladeSoundConfig from './CrossbladeSoundConfig';
 import { CrossbladeEventKey, CrossbladePlaylistSound } from './types';
-import { getCrossfadeVolume, generateCrossbladeSounds, debug, localFade, getUniqueSounds } from './utils';
+import { getCrossfadeVolume, generateCrossbladeSounds, debug, localFade, getUniqueCrossbladeSounds } from './utils';
 
 export namespace PlaylistOverrides {
   export async function _onSoundStartWrapper(
@@ -23,7 +23,7 @@ export namespace PlaylistOverrides {
         if (sound.sound?.playing && sound.id) {
           const next = this._getNextSound(sound.id) as CrossbladePlaylistSound;
           if (next && next.crossbladeSounds)
-            getUniqueSounds(next).forEach((ns: Sound) => {
+            getUniqueCrossbladeSounds(next).forEach((ns: Sound) => {
               ns.load();
             });
         }
@@ -35,7 +35,7 @@ export namespace PlaylistOverrides {
 
   export function _onDeleteWrapper(this: Playlist, wrapped: (...args: unknown[]) => void, ...args: unknown[]) {
     wrapped(...args);
-    this.sounds.forEach((pls: CrossbladePlaylistSound) => getUniqueSounds(pls).forEach((s) => s.stop()));
+    this.sounds.forEach((pls: CrossbladePlaylistSound) => getUniqueCrossbladeSounds(pls).forEach((s) => s.stop()));
   }
 }
 
@@ -106,7 +106,7 @@ export namespace PlaylistSoundOverrides {
     if ('path' in changed || (changed.flags?.crossblade && 'soundLayers' in changed.flags.crossblade)) {
       if (oldCrossbladeSounds) {
         Array.from(oldCrossbladeSounds.keys()).forEach((k) => {
-          const cbs = oldCrossbladeSounds.get(k) ?? new Set();
+          const cbs = oldCrossbladeSounds.get(k) ?? [];
           cbs.forEach((s) => {
             if (s.playing) {
               s.stop();
