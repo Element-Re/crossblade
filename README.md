@@ -37,7 +37,7 @@ The GM starts a combat and begins playing the newly-configured playlist sound. T
 ## More Advanced Usage
 Crossblade is not limited to playlist sounds with only two layers. A playlist sound can have multiple layers with their own triggering events, and each layer can be triggered by more than one event. If multiple layers are triggered by the same event, they will play simultaneously, effectively mixing together to a single blended sound.
 
-[Complex Sound Layers Example](/src/assets/readme/Complex%20Sound%20Layers.webp "Complex Sound Layers Example")
+[Complex Sound Layers Example](/src/assets/readme/Complex%20Sound%20Layers.webp?raw=true "Complex Sound Layers Example")
 
 You can include a sound layer that references the same file as the playlist sound's main audio source. This will allow you to configure it to play during specific events as well as when there is no other applicable event.
 ### Fade Duration
