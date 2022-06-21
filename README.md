@@ -5,7 +5,7 @@ With Crossblade, you can setup playlist sounds that employ techniques sometimes 
 
 ![](/src/assets/readme/Sound%20Diagram.svg "Crossblade Sound with Layers")
 
-A Crossblade-configured sound can be part of a larger playlist of sounds, of which any or none could configured with additional sound layers. Crossblade will only attempt to crossfade currently playing sounds that are configured with additional layers—any other sound will play as normal without Crossblade fading.
+A Crossblade-configured sound can be part of a larger playlist of sounds, of which any or none could configured with additional sound layers. Crossblade will only attempt to crossfade currently playing sounds that are configured with additional layers—any other sound will play as normal without Crossblade interfering.
 
 ![](/src/assets/readme/Playlist%20Diagram.svg "Playlist with Mixed Sounds")
 
