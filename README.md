@@ -59,6 +59,7 @@ There are two ways to access the Crossblade Sound Layer Configuration dialog for
 * **Default:** This event will trigger if no other, better event applies. By default, Crossblade will consider the main audio source for a playlist sound to be treated as a Crossblade sound layer with a Default event trigger.
 * **Disposition:** These will only trigger during combat, based on the disposition of the current combatant.
 * **Game Paused:** This event will trigger when the game is paused. A setting controls whether or not this event can trigger during combat. In addition to the Module Settings tab of the Configure Game Settings dialog, there is a button to toggle this setting on and off and in the Ambient Sound Controls menu on the left side of the game window.
+
 Support for more events, including non-combat and manually-triggered events, is planned for a future release.
 ## Additional Features
 Crossblade adds a right-click context menu option to playlists to automatically preload all playlist sounds and Crossblade sound layers for that playlist for all connected clients, rather than having to preload each playlist sound one-by-one. Depending on the number of playlist sounds and layers, and the clients' connections this could take quite a while.
