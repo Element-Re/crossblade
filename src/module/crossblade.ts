@@ -154,3 +154,23 @@ Hooks.on('getSceneControlButtons', (buttons) => {
     toggle: true,
   });
 });
+
+Hooks.on('renderPlaylistDirectory', (app: Application, html: JQuery) => {
+  const sounds = html.find('.directory-list .sound');
+  sounds.each((index, sound) => {
+    const $sound = $(sound);
+    const playlistId = $sound.data('playlist-id');
+    const soundId = $sound.data('sound-id');
+    if (typeof playlistId === 'string' && typeof soundId === 'string') {
+      const gameSound = game.playlists?.get(playlistId)?.sounds.get(soundId) as CrossbladePlaylistSound;
+      const uniqueSounds = getUniqueCrossbladeSounds(gameSound);
+      if (uniqueSounds.size) {
+        const crossbladeIcon = `<i class="crossblade-font-icon fa-fw" title="${game.i18n.format(
+          'CROSSBLADE.Layers.Count',
+          { count: uniqueSounds.size },
+        )}"></i>`;
+        $sound.find('.sound-name').append(crossbladeIcon);
+      }
+    }
+  });
+});
