@@ -120,7 +120,8 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
   if (Array.isArray(soundLayers)) {
     soundLayers?.forEach((sl) => {
       if (sl.src && sl.events && sl.events.length > 0) {
-        const layerSound = createCrossbladeSound(sl.src, pls);
+        // Use the base sound if it matches the layer, or create a new one.
+        const layerSound = pls.sound?.src === sl.src ? pls.sound : createCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
           sl.events.forEach((e) => {
             const eventSounds = crossbladeSounds.get(e) ?? [];
@@ -130,7 +131,6 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
       }
     });
   }
-
   return crossbladeSounds;
 }
 
@@ -317,12 +317,7 @@ export class CrossbladeController {
         const uniqueSounds = getUniqueCrossbladeSounds(pls);
         // Ensure all crossblade sounds are loaded before attempting crossfade...
         await Promise.all([...uniqueSounds].map(async (s) => await s.load()));
-        // TODO: pls.sound is a different object reference than any of the sound layers
-        // This can theoretically lead to the same audio source being crossfaded twice
-        // but currently it's necessary for all layers to crossfade properly when one
-        // of the layers has the same audio source as the base playlist sound.
-        // It would be better if we could ensure pls.sound was a singleton like the
-        // rest of the layers...
+        // Set *should* filter this out if one of the layers is the same as the base sound
         if (pls.sound) uniqueSounds.add(pls.sound);
         uniqueSounds.forEach((s) => {
           s.fade(getCrossfadeVolume(pls, s), { duration: pls.fadeDuration });
