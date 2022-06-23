@@ -9,13 +9,13 @@ import {
   inArray,
   updatePlaylistSocket,
   getCrossbladeEvent,
-  updatePlaylistSoundSocket,
   updateCrossbladeEventSocket,
   getCrossbladeEventSocket,
   CrossbladeController,
   crossfadePlaylistsSocket,
   isLeadGM,
   getUniqueCrossbladeSounds,
+  updatePlaylistSoundSocket,
 } from './utils';
 import { DevModeApi, CrossbladePlaylistSound } from './types';
 import { PlaylistDirectoryOverrides, PlaylistOverrides, PlaylistSoundOverrides } from './overrides';
@@ -33,7 +33,7 @@ Hooks.once('init', async () => {
   Object.defineProperty(PlaylistSound.prototype, 'crossbladeSounds', {
     get: PlaylistSoundOverrides.crossbladeSoundsGetter,
   });
-  libWrapper.register(MODULE_ID, 'PlaylistSound.prototype.sync', PlaylistSoundOverrides.syncWrapper, 'WRAPPER');
+  libWrapper.register(MODULE_ID, 'PlaylistSound.prototype.sync', PlaylistSoundOverrides.syncWrapper, 'MIXED');
   libWrapper.register(
     MODULE_ID,
     'PlaylistSound.prototype._onUpdate',

@@ -41,11 +41,14 @@ export function inArray(array: any[] | undefined | null, toCheck: any | undefine
 export function createCrossbladeSound(src: string, basedOn: PlaylistSound) {
   try {
     if (!basedOn.id || !basedOn.data.path) return null;
-    const sound = game.audio.create({
-      src: src,
-      preload: false,
-      singleton: true,
-    });
+    const sound =
+      basedOn.sound?.src === src
+        ? basedOn.sound
+        : game.audio.create({
+            src: src,
+            preload: false,
+            singleton: true,
+          });
     return sound;
   } catch (e) {
     console.error(e);
@@ -121,7 +124,7 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
     soundLayers?.forEach((sl) => {
       if (sl.src && sl.events && sl.events.length > 0) {
         // Use the base sound if it matches the layer, or create a new one.
-        const layerSound = pls.sound?.src === sl.src ? pls.sound : createCrossbladeSound(sl.src, pls);
+        const layerSound = createCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
           sl.events.forEach((e) => {
             const eventSounds = crossbladeSounds.get(e) ?? [];
@@ -290,17 +293,15 @@ export class CrossbladeController {
     );
   }
   static async crossfadePlaylists(...playlists: Playlist[]) {
-    debug('crossfading Playlists...', playlists);
-
     playlists = playlists.length ? playlists : game.playlists?.playing || [];
+    debug('crossfading Playlists...', playlists);
     const crossbladeSounds: PlaylistSound[] = [];
     playlists.forEach((p) =>
       crossbladeSounds.push(
-        ...p.sounds.filter((s: PlaylistSound) => {
-          const cbps = s as CrossbladePlaylistSound;
-          const cbpsSize = cbps.crossbladeSounds?.size;
+        ...p.sounds.filter((pls: CrossbladePlaylistSound) => {
+          const cbpsSize = pls.crossbladeSounds?.size;
           const isCrossbladeSound = typeof cbpsSize === 'number' && cbpsSize > 0;
-          return s.playing && isCrossbladeSound;
+          return pls.playing && isCrossbladeSound;
         }),
       ),
     );
@@ -316,10 +317,11 @@ export class CrossbladeController {
         if (!cbps.sound.loaded) await cbps.sound.load();
         const uniqueSounds = getUniqueCrossbladeSounds(pls);
         // Ensure all crossblade sounds are loaded before attempting crossfade...
-        await Promise.all([...uniqueSounds].map(async (s) => await s.load()));
+        await Promise.all([...uniqueSounds].map(async (s) => s.load()));
         // Set *should* filter this out if one of the layers is the same as the base sound
         if (pls.sound) uniqueSounds.add(pls.sound);
         uniqueSounds.forEach((s) => {
+          debug(s.src, s.currentTime);
           s.fade(getCrossfadeVolume(pls, s), { duration: pls.fadeDuration });
         });
       }
