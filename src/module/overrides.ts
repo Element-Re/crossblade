@@ -51,8 +51,7 @@ export namespace PlaylistSoundOverrides {
     wrapped: (...args: never[]) => Sound | Promise<Sound> | undefined,
   ) {
     const layerSounds = getUniqueCrossbladeSounds(this);
-    if (!this.sound || !layerSounds.size) return wrapped();
-    if (!this.sound || this.sound.failed) return;
+    if (!this.sound || this.sound.failed || !layerSounds.size) return wrapped();
     // In case of duplicate
     layerSounds.delete(this.sound);
     const fade = this.fadeDuration;
