@@ -1,10 +1,14 @@
+### 1.0.6
+- [Changed] Updated README.md
+- [Changed] The build process should now be packaging README.md and CHANGELOG.md with the module
+
 ### 1.0.5
 
 - [Changed] Refactor of layer generation logic to reuse the main sound object if the same audio source is specified in a sound layer
 - [Fixed] Resolved a number of cases that could cause sound layers to go out of sync from the base sound
 - [Added] Crossblade-enabled sounds will now display a "⚔" icon next to their name in the playlist directory, so that they can be identified at a glance
 
-![](/src/assets/changelog/playlist-directory-icons.webp)
+!['Playlist Directory Icons'](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/changelog/playlist-directory-icons.webp?raw=true "Playlist Directory Icons")
 
 ### 1.0.4
 

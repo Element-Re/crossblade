@@ -22,6 +22,8 @@ const stylesDirectory = `${sourceDirectory}/styles`;
 const stylesExtension = 'css';
 const sourceFileExtension = 'ts';
 const staticFiles = ['assets', 'fonts', 'lang', 'packs', 'templates', 'module.json'];
+const projectDirectory = '.';
+const projectFiles = ['README.md', 'CHANGELOG.md'];
 
 /********************/
 /*      BUILD       */
@@ -55,9 +57,14 @@ function buildStyles() {
  * Copy static files
  */
 async function copyFiles() {
-  for (const file of staticFiles) {
-    if (fs.existsSync(`${sourceDirectory}/${file}`)) {
-      await fs.copy(`${sourceDirectory}/${file}`, `${distDirectory}/${file}`);
+  for (const staticFile of staticFiles) {
+    if (fs.existsSync(`${sourceDirectory}/${staticFile}`)) {
+      await fs.copy(`${sourceDirectory}/${staticFile}`, `${distDirectory}/${staticFile}`);
+    }
+  }
+  for (const projectFile of projectFiles) {
+    if (fs.existsSync(`${projectDirectory}/${projectFile}`)) {
+      await fs.copy(`${projectDirectory}/${projectFile}`, `${distDirectory}/${projectFile}`);
     }
   }
 }
@@ -68,11 +75,9 @@ async function copyFiles() {
 function watch() {
   gulp.watch(`${sourceDirectory}/**/*.${sourceFileExtension}`, { ignoreInitial: false }, buildCode);
   gulp.watch(`${stylesDirectory}/**/*.${stylesExtension}`, { ignoreInitial: false }, buildStyles);
-  gulp.watch(
-    staticFiles.map((file) => `${sourceDirectory}/${file}`),
-    { ignoreInitial: false },
-    copyFiles,
-  );
+  const staticFilesPaths = staticFiles.map((staticFile) => `${sourceDirectory}/${staticFile}`);
+  const projectFilesPaths = projectFiles.map((projectFile) => `${projectDirectory}/${projectFile}`);
+  gulp.watch(staticFilesPaths.concat(projectFilesPaths), { ignoreInitial: false }, copyFiles);
 }
 
 const build = gulp.series(clean, gulp.parallel(buildCode, buildStyles, copyFiles));
@@ -85,7 +90,7 @@ const build = gulp.series(clean, gulp.parallel(buildCode, buildStyles, copyFiles
  * Remove built files from `dist` folder while ignoring source files
  */
 async function clean() {
-  const files = [...staticFiles, 'module'];
+  const files = [...staticFiles, ...projectFiles, 'module'];
 
   if (fs.existsSync(`${stylesDirectory}/${name}.${stylesExtension}`)) {
     files.push('styles');

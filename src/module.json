@@ -1,12 +1,16 @@
 {
   "name": "crossblade",
-  "title": "Crossblade - Adaptive Music Crossfader for Combat and More",
-  "description": "Enables the GM to configure adaptive music playlist sounds that crossfade between multiple sound layers in response to combat and more",
+  "title": "Crossblade - Adaptive Music Crossfader",
+  "description": "Enables the GM to configure adaptive music playlist sounds that crossfade between multiple audio layers in response to combat and more",
   "version": "This is auto replaced",
-  "author": "Elemental_Re",
+  "author": "Element_Re",
   "authors": [
     {
-      "name": "Elemental_Re"
+      "name": "Element_Re",
+      "email": "element.re.dev@gmail.com",
+      "discord": "Element_Re#9182",
+      "ko-fi": "element-re",
+      "reddit": "u/element-re"
     }
   ],
   "minimumCoreVersion": "9",
@@ -34,9 +38,11 @@
   "url": "This is auto replaced",
   "manifest": "This is auto replaced",
   "download": "This is auto replaced",
-  "license": "MIT",
+  "license": "https://github.com/Elemental-Re/crossblade/blob/main/LICENSE",
   "readme": "https://github.com/Elemental-Re/crossblade/blob/main/README.md",
+  "changelog": "https://github.com/Elemental-Re/crossblade/blob/main/CHANGELOG.md",
   "bugs": "https://github.com/Elemental-Re/crossblade/issues",
   "system": [],
-  "library": false
+  "library": false,
+  "manifestPlusVersion": "1.2.0"
 }

@@ -1,19 +1,22 @@
 {
   "private": true,
   "name": "crossblade",
-  "description": "Crossfades between multiple layered tracks during combat",
+  "description": "Enables the GM to configure adaptive music playlist sounds that crossfade between multiple audio layers in response to combat and more",
   "license": "MIT",
   "homepage": "https://github.com/Elemental-Re/crossblade",
   "repository": {
     "type": "git",
     "url": "https://github.com/Elemental-Re/crossblade"
   },
+  "funding": "https://ko-fi.com/element_re",
   "bugs": {
     "url": "https://github.com/Elemental-Re/crossblade/issues"
   },
   "contributors": [
     {
-      "name": "Elemental_Re"
+      "name": "Element_Re",
+      "email": "element.re.dev@gmail.com",
+      "url": "https://github.com/Elemental-Re"
     }
   ],
   "type": "module",
