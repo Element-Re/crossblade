@@ -1,5 +1,5 @@
 import { ConfiguredDocumentClass } from '@league-of-foundry-developers/foundry-vtt-types/src/types/helperTypes';
-import { CrossbladeFlags } from './types';
+import { CrossbladeEventKey, CrossbladeFlags } from './types';
 import { CROSSBLADE_EVENTS, debug } from './utils';
 
 export default class CrossbladeSoundConfig<
@@ -15,7 +15,7 @@ export default class CrossbladeSoundConfig<
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['crossblade-edit-layers'],
       template: 'modules/crossblade/templates/crossblade-sound-config.hbs',
-      width: 360,
+      width: 440,
     });
   }
 
@@ -39,11 +39,13 @@ export default class CrossbladeSoundConfig<
         } | null;
       } | null;
     };
+    debug('submitData', submitData);
     // Create the expanded update soundLayers object
     const crossblade = submitData.flags?.crossblade;
     if (crossblade?.soundLayers) {
       crossblade.soundLayers = Object.values(crossblade.soundLayers).map((sl) => [sl[0] || '', sl[1] || '']);
     }
+    debug('submitData (after)', submitData);
     return submitData;
   }
   /** @override */
@@ -51,16 +53,37 @@ export default class CrossbladeSoundConfig<
     debug('activatingListeners...');
     super.activateListeners(html);
     if (this.isEditable) {
-      html.find('.crossblade-layer-control').on('click', this._onCrossbladeLayerControl.bind(this));
+      html.find('.crossblade-click-control').on('click', this._onCrossbladeClickControl.bind(this));
+      html.find('.crossblade-change-control').on('change', this._onCrossbladeChangeControl.bind(this));
     }
     html.find('.crossblade-help').on('click', (event) => {
       event.stopPropagation();
       event.preventDefault();
     });
   }
+  protected async _onCrossbladeChangeControl(event: JQuery.ChangeEvent) {
+    debug('change Event...', event);
+    const select = event.currentTarget as HTMLSelectElement;
+    const $select = $(select);
+    if (select.classList.contains('change-event')) {
+      const subControl = $select.siblings('.event-subcontrol');
+      const event = CROSSBLADE_EVENTS[select.value as CrossbladeEventKey];
+      debug('event', event);
+      const layerIndex = $select.parents('.crossblade-sound-layer').data('layer');
+      const eventIndex = $select.parents('.crossblade-event').data('event');
+      //const layerIndex =
+      const newContent = await renderTemplate('modules/crossblade/templates/crossblade-sound-event-subcontrol.hbs', {
+        options: event.options,
+        isCustom: event.isCustom,
+        layerIndex: layerIndex,
+        eventIndex: eventIndex,
+      });
+      subControl.replaceWith(newContent);
+    }
+  }
 
-  protected async _onCrossbladeLayerControl(event: Event) {
-    debug('control Event...', event);
+  protected async _onCrossbladeClickControl(event: JQuery.ClickEvent) {
+    debug('click Event...', event);
     event.preventDefault();
     event.stopPropagation();
     const a = event.currentTarget as HTMLAnchorElement;
@@ -90,6 +113,32 @@ export default class CrossbladeSoundConfig<
       layerContainer?.remove();
       this.setPosition({ height: 'auto' });
     }
+
+    // Add an event
+    if (a.classList.contains('add-event')) {
+      debug('adding Event...');
+      const soundLayer = $(a).parents('.crossblade-sound-layer');
+      const events = soundLayer.find('.crossblade-events');
+      const layerIndex = soundLayer.data('layer');
+      debug(events);
+      const newContent = await renderTemplate('modules/crossblade/templates/crossblade-sound-event.hbs', {
+        layerIndex: layerIndex,
+        eventIndex: randomID(),
+        crossbladeEvents: CROSSBLADE_EVENTS,
+      });
+      const $newContent = $(newContent);
+      $newContent.appendTo(events);
+      this.activateListeners($newContent);
+      this.setPosition({ height: 'auto' });
+    }
+
+    // Remove an event
+    if (a.classList.contains('delete-event')) {
+      debug('deleting Event...');
+      const eventContainer = a.closest('.crossblade-event');
+      eventContainer?.remove();
+      this.setPosition({ height: 'auto' });
+    }
   }
 
   /** @override */
@@ -101,14 +150,21 @@ export default class CrossbladeSoundConfig<
     const crossbladeFlags = flags.crossblade || {};
     debug('crossbladeFlags', crossbladeFlags);
     const soundLayers = crossbladeFlags.soundLayers || {};
-    return this.object
-      .unsetFlag('crossblade', 'soundLayers')
-      .then(() => {
-        this.object.setFlag('crossblade', 'soundLayers', Array.from(Object.values(soundLayers)) ?? []);
-      })
-      .then(() => {
-        debug(this.object.data.flags);
+    const soundLayersArray = [...Object.values(soundLayers)] as { events?: object }[];
+    soundLayersArray.forEach((soundLayer) => {
+      const events = soundLayer.events ?? {};
+      const eventsArray = Array.from(Object.values(events)).map((event) => {
+        if (Array.isArray(event)) {
+          // Only keep up to first two items
+          return event.slice(0, 2);
+        } else return event;
       });
+      soundLayer.events = eventsArray;
+    });
+    debug('soundLayersArray', soundLayersArray);
+    return this.object.unsetFlag('crossblade', 'soundLayers').then(() => {
+      this.object.setFlag('crossblade', 'soundLayers', soundLayersArray);
+    });
   }
   /** @override */
   get title() {

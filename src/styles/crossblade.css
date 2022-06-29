@@ -1,10 +1,36 @@
-.crossblade-layer-control {
+.crossblade-click-control {
   width: 18px;
   flex: 0 0 18px;
   line-height: 24px;
-  float: right;
-  text-align: right;
   color: #7a7971;
+}
+.crossblade-event {
+  clear: both;
+  display: flex;
+  align-content: flex-end;
+}
+
+.crossblade-event > :not(:last-child) {
+  margin-right: 3px;
+}
+
+.crossblade-sound-config .section-header {
+  display: flex;
+}
+
+.crossblade-sound-config .section-header .header-label {
+  white-space: nowrap;
+}
+
+.crossblade-sound-config .crossblade-sound-layer > .section-header {
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px groove #eeede0;
+}
+
+.crossblade-sound-config .fill {
+  display: inline-block;
+  width: 100%;
 }
 
 .crossblade-icon {

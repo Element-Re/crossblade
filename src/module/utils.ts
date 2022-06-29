@@ -9,25 +9,40 @@ import {
 
 export const CROSSBLADE_EVENTS: Record<CrossbladeEventKey, CrossbladeEvent> = {
   DEFAULT: {
+    key: 'DEFAULT',
     label: 'CROSSBLADE.Events.Default.Label',
     description: 'CROSSBLADE.Events.Default.Description',
-  } as CrossbladeEvent,
-  COMBAT_DISPOSITION_FRIENDLY: {
-    label: 'CROSSBLADE.Events.Combat.Disposition.FRIENDLY.Label',
-    description: 'CROSSBLADE.Events.Combat.Disposition.FRIENDLY.Description',
-  } as CrossbladeEvent,
-  COMBAT_DISPOSITION_NEUTRAL: {
-    label: 'CROSSBLADE.Events.Combat.Disposition.NEUTRAL.Label',
-    description: 'CROSSBLADE.Events.Combat.Disposition.NEUTRAL.Description',
-  } as CrossbladeEvent,
-  COMBAT_DISPOSITION_HOSTILE: {
-    label: 'CROSSBLADE.Events.Combat.Disposition.HOSTILE.Label',
-    description: 'CROSSBLADE.Events.Combat.Disposition.HOSTILE.Description',
-  } as CrossbladeEvent,
-  GAME_PAUSED: {
-    label: 'CROSSBLADE.Events.Game.Paused.Label',
-    description: 'CROSSBLADE.Events.Game.Paused.Description',
-  } as CrossbladeEvent,
+  },
+  COMBATANT: {
+    key: 'COMBATANT',
+    label: 'CROSSBLADE.Events.Combatant.Label',
+    description: 'CROSSBLADE.Events.Combatant.Description',
+    options: {
+      FRIENDLY: 'TOKEN.FRIENDLY',
+      NEUTRAL: 'TOKEN.NEUTRAL',
+      HOSTILE: 'TOKEN.HOSTILE',
+    },
+  },
+  // COMBATANT_TAG: {
+  //   key: 'COMBATANT', // Technically the same as the normal Combatant event
+  //   label: 'CROSSBLADE.Events.CombatantTag.Label',
+  //   description: 'CROSSBLADE.Events.CombatantTag.Description',
+  //   isCustom: true,
+  // },
+  GAME: {
+    key: 'GAME',
+    label: 'CROSSBLADE.Events.Game.Label',
+    description: 'CROSSBLADE.Events.Game.Description',
+    options: {
+      PAUSED: 'GAME.Paused',
+    },
+  },
+  CUSTOM: {
+    key: 'CUSTOM',
+    label: 'CROSSBLADE.Events.Custom.Label',
+    description: 'CROSSBLADE.Events.Custom.Description',
+    isCustom: true,
+  },
 };
 
 export const MODULE_ID = 'crossblade';
@@ -56,16 +71,16 @@ export function createCrossbladeSound(src: string, basedOn: PlaylistSound) {
   }
 }
 
-export function getCrossbladeEvent(): CrossbladeEventKey | null {
-  if (game.settings.get(MODULE_ID, 'combatPause') === true && game.paused) return 'GAME_PAUSED';
+export function getCrossbladeEvent(): string {
+  if (game.settings.get(MODULE_ID, 'combatPause') === true && game.paused) return 'GAME: PAUSED';
   if (!game.combat?.started) return game.paused ? 'GAME_PAUSED' : 'DEFAULT';
   switch (game.combat?.combatant?.token?.data.disposition) {
     case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
-      return 'COMBAT_DISPOSITION_FRIENDLY';
+      return 'TENSION: MEDIUM';
     case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
-      return 'COMBAT_DISPOSITION_NEUTRAL';
+      return 'TENSION: LOW';
     case CONST.TOKEN_DISPOSITIONS.HOSTILE:
-      return 'COMBAT_DISPOSITION_HOSTILE';
+      return 'TENSION: HIGH';
     default:
       return 'DEFAULT';
   }
@@ -73,18 +88,23 @@ export function getCrossbladeEvent(): CrossbladeEventKey | null {
 
 export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, volume: number = pls.volume) {
   let crossbladeEvent = CrossbladeController.getCurrentEvent();
-  const crossbladeSounds = pls.crossbladeSounds;
+  const soundLayers = pls.cbSoundLayers;
+  if (!soundLayers) throw `${pls.name} has no Crossblade sound layer data`;
+  const layerEvents = soundLayers.get(sound);
+  if (!layerEvents) throw `${sound.src} is not a layer of ${pls.name}`;
   // Default volume --- Only activate if this is the base sound;
   let fadeVolume = pls.sound?.id === sound.id ? volume : 0;
-  // If crossblade is enabled and if there's a current event and crossblade is initialized for this PlaylistSound
-  if (game.settings.get(MODULE_ID, 'enable') === true && crossbladeEvent && crossbladeSounds) {
+  // If crossblade is enabled and and this PlaylistSound has crossblade sound layers
+  if (game.settings.get(MODULE_ID, 'enable') === true && soundLayers.size) {
     // Default event if there's no sounds for this event.
-    if (!crossbladeSounds.get(crossbladeEvent)?.length) {
+    if (!layerEvents.includes(crossbladeEvent) && crossbladeEvent !== 'DEFAULT') {
       crossbladeEvent = 'DEFAULT';
     }
-    const currentEventSounds = new Set(crossbladeSounds.get(crossbladeEvent) || []);
+    const currentEventSounds = new Set(
+      [...soundLayers.entries()].filter((entry) => entry[1].includes(crossbladeEvent)).map((entry) => entry[0]),
+    );
     const otherEventSounds = new Set(
-      ...[...crossbladeSounds.entries()].filter((entry) => entry[0] !== crossbladeEvent).map((entry) => entry[1]),
+      [...soundLayers.entries()].filter((entry) => !entry[1].includes(crossbladeEvent)).map((entry) => entry[0]),
     );
 
     // If this event has sounds
@@ -100,12 +120,12 @@ export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, v
 }
 
 export function getUniqueCrossbladeSounds(pls: CrossbladePlaylistSound): Set<Sound> {
-  return new Set([...(pls.crossbladeSounds?.values() ?? [])].flat());
+  return new Set([...(pls.cbSoundLayers?.keys() ?? [])]);
 }
 
 export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
   const localVolume = volume * game.settings.get('core', 'globalPlaylistVolume');
-  if (pls.crossbladeSounds && pls.sound) {
+  if (pls.cbSoundLayers && pls.sound) {
     getUniqueCrossbladeSounds(pls).forEach(async (s) => {
       s.fade(getCrossfadeVolume(pls, s, localVolume), {
         duration: PlaylistSound.VOLUME_DEBOUNCE_MS,
@@ -116,7 +136,7 @@ export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
 
 export function generateCrossbladeSounds(pls: PlaylistSound) {
   debug('generateCrossbladeSounds');
-  const crossbladeSounds = new Map<CrossbladeEventKey, Sound[]>();
+  const crossbladeSounds = new Map<Sound, string[]>();
 
   const soundLayers = pls.getFlag('crossblade', 'soundLayers') as SoundLayer[] | undefined;
   debug('soundLayers', soundLayers);
@@ -126,10 +146,11 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
         // Use the base sound if it matches the layer, or create a new one.
         const layerSound = createCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
-          sl.events.forEach((e) => {
-            const eventSounds = crossbladeSounds.get(e) ?? [];
-            crossbladeSounds.set(e, eventSounds.concat(layerSound));
-          });
+          crossbladeSounds.set(layerSound, sl.events);
+          // sl.events.forEach((e) => {
+          //   const eventSounds = crossbladeSounds.get(e) ?? [];
+          //   crossbladeSounds.set(e, eventSounds.concat(layerSound));
+          // });
         }
       }
     });
@@ -151,6 +172,11 @@ export const getFirstActiveGM = function () {
 export const isLeadGM = function () {
   return game.user === getFirstActiveGM();
 };
+
+export async function clearCrossbladeData(pls: CrossbladePlaylistSound) {
+  const flags = pls.data.flags[MODULE_ID] as Record<string, unknown>;
+  await Promise.all(Array.from(Object.keys(flags)).map((flag) => pls.unsetFlag(MODULE_ID, flag)));
+}
 
 export function log(...args: unknown[]) {
   console.log(`⚔️${MODULE_NAME} |`, ...args);
@@ -224,18 +250,18 @@ function _getCrossbladeEventSocket() {
   return getCrossbladeEvent();
 }
 
-export async function updateCrossbladeEventSocket(status: CrossbladeEventKey | null) {
+export async function updateCrossbladeEventSocket(status: string) {
   debug('updateCrossbladeEventSocket', status);
   return socket?.executeForEveryone(_updateCrossbladeEventSocket, status);
 }
 
-function _updateCrossbladeEventSocket(status: CrossbladeEventKey | null) {
+function _updateCrossbladeEventSocket(status: string) {
   debug('_updateCrossbladeEventSocket', status);
   CrossbladeController.setCurrentEvent(status);
   CrossbladeController.crossfadePlaylists();
 }
 
-export async function updatePlaylistSocket(status: CrossbladeEventKey | null, ...playlists: Playlist[]) {
+export async function updatePlaylistSocket(status: string, ...playlists: Playlist[]) {
   debug('updatePlaylistSocket', status, playlists);
   return socket?.executeForEveryone(
     _updatePlaylistSocket,
@@ -244,19 +270,19 @@ export async function updatePlaylistSocket(status: CrossbladeEventKey | null, ..
   );
 }
 
-function _updatePlaylistSocket(status: CrossbladeEventKey | null, ...playlistIds: string[]) {
+function _updatePlaylistSocket(status: string, ...playlistIds: string[]) {
   debug('_updatePlaylistSocket', status, playlistIds);
   CrossbladeController.setCurrentEvent(status);
   const playlists = game.playlists?.filter((p) => playlistIds.includes(p.id)) ?? [];
   CrossbladeController.crossfadePlaylists(...playlists);
 }
 
-export async function updatePlaylistSoundSocket(status: CrossbladeEventKey | null, ...sounds: PlaylistSound[]) {
+export async function updatePlaylistSoundSocket(status: string, ...sounds: PlaylistSound[]) {
   debug('updatePlaylistSoundSocket', status, sounds);
   return socket?.executeForEveryone(_updatePlaylistSoundSocket, status, ...sounds.map((s) => s.uuid));
 }
 
-function _updatePlaylistSoundSocket(status: CrossbladeEventKey | null, ...soundUuids: string[]) {
+function _updatePlaylistSoundSocket(status: string, ...soundUuids: string[]) {
   debug('_updatePlaylistSoundSocket', status, soundUuids);
   CrossbladeController.setCurrentEvent(status);
 
@@ -270,14 +296,14 @@ function _updatePlaylistSoundSocket(status: CrossbladeEventKey | null, ...soundU
 }
 
 export class CrossbladeController {
-  protected static _currentStatus: CrossbladeEventKey | null = null;
+  protected static _currentStatus = 'DEFAULT';
 
-  static getCurrentEvent(): CrossbladeEventKey | null {
+  static getCurrentEvent(): string {
     debug('getCurrentEvent', this._currentStatus);
     return this._currentStatus;
   }
 
-  static setCurrentEvent(status: CrossbladeEventKey | null) {
+  static setCurrentEvent(status: string) {
     debug('getCurrentEvent', status);
     this._currentStatus = status;
   }
@@ -287,7 +313,7 @@ export class CrossbladeController {
     return playlists?.filter((p) =>
       p.sounds.find((s) => {
         const cbps = s as CrossbladePlaylistSound;
-        if (cbps.crossbladeSounds && cbps.crossbladeSounds.size > 0) return true;
+        if (cbps.cbSoundLayers && cbps.cbSoundLayers.size > 0) return true;
         else return false;
       }),
     );
@@ -299,7 +325,7 @@ export class CrossbladeController {
     playlists.forEach((p) =>
       crossbladeSounds.push(
         ...p.sounds.filter((pls: CrossbladePlaylistSound) => {
-          const cbpsSize = pls.crossbladeSounds?.size;
+          const cbpsSize = pls.cbSoundLayers?.size;
           const isCrossbladeSound = typeof cbpsSize === 'number' && cbpsSize > 0;
           return pls.playing && isCrossbladeSound;
         }),
@@ -312,7 +338,7 @@ export class CrossbladeController {
     debug('crossfading sounds...', playlistSounds);
     playlistSounds.forEach(async (pls) => {
       const cbps = pls as CrossbladePlaylistSound;
-      if (cbps.crossbladeSounds && cbps.sound) {
+      if (cbps.cbSoundLayers && cbps.sound) {
         log('Handling crossfade for', `🎵${pls.name}🎵`);
         if (!cbps.sound.loaded) await cbps.sound.load();
         const uniqueSounds = getUniqueCrossbladeSounds(pls);

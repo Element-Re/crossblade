@@ -1,8 +1,23 @@
+{{#*inline "eventPartial"}}
+<div class="crossblade-event" data-event="eventIndex">
+    <select class="crossblade-change-control change-event" name="flags.crossblade.soundLayers.{{layerIndex}}.events.{{eventIndex}}">
+        {{#each crossbladeEvents}}
+            <option value="{{this.key}}" title="{{localize this.description}}" {{#if (eq ../this.[0] @key )}}selected {{/if}}>{{localize this.label}}</option>
+        {{/each}}
+    </select>
+    {{> crossbladeSoundEventSubcontrol (lookup crossbladeEvents this.[0]) layerIndex=layerIndex eventIndex=eventIndex value=this.[1] }}
+    <a class="crossblade-click-control delete-event" title="{{localize 'CROSSBLADE.Sound.Event.Remove'}}">
+        <i class="fas fa-minus"></i>
+    </a>
+</div>
+{{/inline}}
+
 {{#*inline "soundLayerPartial"}}
     <div class="crossblade-sound-layer" data-layer="{{index}}">
-        <h4>
-            🔊{{ localize "CROSSBLADE.Sound.Layer.Name" }}
-            <a class="crossblade-layer-control delete-layer" title="{{localize 'CROSSBLADE.Sound.Layer.Remove'}}">
+        <h4 class="section-header">
+            <span class="header-label">🔊{{ localize "CROSSBLADE.Sound.Layer.Name" }}</span>
+            <span class="fill"></span>
+            <a class="crossblade-click-control delete-layer" title="{{localize 'CROSSBLADE.Sound.Layer.Remove'}}">
                 <i class="fas fa-minus"></i>
             </a>
         </h4>
@@ -17,26 +32,28 @@
         <div class="form-group row">
             <label>{{localize "CROSSBLADE.Sound.Layer.EventTrigger"}}</label>
             <div class="crossblade-events">
-            {{#each crossbladeEvents}}
-                <div class='form-check form-check-inline' title='{{localize this.description}}'>
-                    <label class='form-check-label'>
-                        <input class='form-check-input' type='checkbox' name='flags.crossblade.soundLayers.{{../index}}.events' value='{{@key}}' {{checked (inArray (getProperty ../this 'events') @key) }} />
-                        {{localize this.label}}
-                    </label>
+                <div class="section-header">
+                    <span class="fill"></span>
+                    <a class="crossblade-click-control add-event" title="{{localize 'CROSSBLADE.Sound.Event.Add'}}">
+                        <i class="fas fa-plus"></i>
+                    </a>
                 </div>
-            {{/each}}
+                {{#each events}}
+                    {{> eventPartial layerIndex=../index eventIndex=@index crossbladeEvents=../crossbladeEvents}}
+                {{/each}}
             </div>
         </div>
     </div>
 {{/inline}}
 
-<form autocomplete="off">
-    <h4>
-        <a class="crossblade-help" title="{{ localize 'CROSSBLADE.Layers.Help' }}">
+<form class="crossblade-sound-config" autocomplete="off">
+    <h4 class="section-header">
+        <a class="header-label crossblade-help" title="{{ localize 'CROSSBLADE.Layers.Help' }}">
             {{ localize "CROSSBLADE.Layers.Name" }}
             <i class="fas fa-question-circle"></i>
         </a>
-        <a class="crossblade-layer-control add-layer" title="{{localize 'CROSSBLADE.Sound.Layer.Add'}}">
+        <span class="fill"></span>
+        <a class="crossblade-click-control add-layer" title="{{localize 'CROSSBLADE.Sound.Layer.Add'}}">
             <i class="fas fa-plus"></i>
         </a>
     </h4>

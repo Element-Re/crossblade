@@ -1,6 +1,14 @@
 import CrossbladeSoundConfig from './CrossbladeSoundConfig';
-import { CrossbladePlaylistSound } from './types';
-import { getCrossfadeVolume, generateCrossbladeSounds, debug, localFade, getUniqueCrossbladeSounds } from './utils';
+import { CrossbladePlaylistSound, DevModeModuleData } from './types';
+import {
+  getCrossfadeVolume,
+  generateCrossbladeSounds,
+  debug,
+  localFade,
+  getUniqueCrossbladeSounds,
+  clearCrossbladeData,
+  MODULE_ID,
+} from './utils';
 
 export namespace PlaylistOverrides {
   export async function _onSoundStartWrapper(
@@ -22,7 +30,7 @@ export namespace PlaylistOverrides {
       setTimeout(() => {
         if (sound.sound?.playing && sound.id) {
           const next = this._getNextSound(sound.id) as CrossbladePlaylistSound;
-          if (next && next.crossbladeSounds)
+          if (next && next.cbSoundLayers)
             getUniqueCrossbladeSounds(next).forEach((ns: Sound) => {
               ns.load();
             });
@@ -158,19 +166,42 @@ export namespace PlaylistDirectoryOverrides {
     wrapped: (...args: never) => MenuItem[],
   ): MenuItem[] {
     const result = wrapped();
-    const crossbladeItem = {
-      name: 'CROSSBLADE.Layers.Config',
-      icon: '<i class="crossblade-font-icon"></i>',
-      callback: (li: JQuery<HTMLElement>) => {
-        debug('in callback', li);
-        const sound = game.playlists?.get(li.data('playlistId'))?.sounds.get(li.data('soundId'));
-        debug(sound);
-        if (sound) {
-          new CrossbladeSoundConfig(sound).render(true);
-        }
-      },
-    } as MenuItem;
-    return result.concat(crossbladeItem);
+    const additionalItems = [
+      {
+        name: 'CROSSBLADE.Layers.Config',
+        icon: '<i class="crossblade-font-icon"></i>',
+        callback: (li: JQuery<HTMLElement>) => {
+          debug('in callback', li);
+          const sound = game.playlists?.get(li.data('playlistId'))?.sounds.get(li.data('soundId'));
+          debug(sound);
+          if (sound) {
+            new CrossbladeSoundConfig(sound).render(true);
+          }
+        },
+      } as MenuItem,
+    ];
+    try {
+      const devMode = game.modules.get('_dev-mode') as DevModeModuleData | undefined;
+      if (devMode?.api?.getPackageDebugValue(MODULE_ID)) {
+        // Clear data is only for debug mode
+        additionalItems.push({
+          name: 'CROSSBLADE.Sound.ClearData',
+          icon: '<i class="fas fa-times-circle"></i>',
+          callback: (li: JQuery<HTMLElement>) => {
+            debug('in callback', li);
+            const sound = game.playlists?.get(li.data('playlistId'))?.sounds.get(li.data('soundId')) as
+              | CrossbladePlaylistSound
+              | undefined;
+            debug(sound);
+            if (sound) {
+              Dialog.confirm({ title: `CROSSBLADE.Sound.ClearDataConfirm`, yes: () => clearCrossbladeData(sound) });
+            }
+          },
+        } as MenuItem);
+      }
+    } catch (e) {}
+
+    return result.concat(...additionalItems);
   }
 
   export function _onSoundVolumeWrapper(

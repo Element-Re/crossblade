@@ -19,13 +19,13 @@
   "CROSSBLADE.PlaylistSoundContext.ConfigureCrossblade": "Configure Crossblade Sound Layers",
   "CROSSBLADE.SimultaneousPlaybackReminder": "Crossblade will only work on playlists that are configured for Simultaneous Playback mode.",
   "CROSSBLADE.Events.Default.Label": "Default",
-  "CROSSBLADE.Events.Default.Description": "Triggers when no other events occur",
-  "CROSSBLADE.Events.Combat.Disposition.FRIENDLY.Label": "Disposition: Friendly",
-  "CROSSBLADE.Events.Combat.Disposition.FRIENDLY.Description": "Triggers on Friendly combatants' turns in combat",
-  "CROSSBLADE.Events.Combat.Disposition.NEUTRAL.Label": "Disposition: Neutral",
-  "CROSSBLADE.Events.Combat.Disposition.NEUTRAL.Description": "Triggers on Neutral combatants' turns in combat",
-  "CROSSBLADE.Events.Combat.Disposition.HOSTILE.Label": "Disposition: Hostile",
-  "CROSSBLADE.Events.Combat.Disposition.HOSTILE.Description": "Triggers on Hostile combatants' turns in combat",
-  "CROSSBLADE.Events.Game.Paused.Label": "Game Paused",
-  "CROSSBLADE.Events.Game.Paused.Description": "Triggers when game is paused; a Crossblade setting controls whether or not this event can be triggered in combat"
+  "CROSSBLADE.Events.Default.Description": "The default event that triggers when no other applicable events occur",
+  "CROSSBLADE.Events.Combatant.Label": "Combatant",
+  "CROSSBLADE.Events.Combatant.Description": "An event based on the current combatant's disposition in combat.",
+  "CROSSBLADE.Events.CombatantTag.Label": "Combatant+",
+  "CROSSBLADE.Events.CombatantTag.Description": "An custom event based on the current combatant's tag. Requires Tagger.",
+  "CROSSBLADE.Events.Game.Label": "Game",
+  "CROSSBLADE.Events.Game.Description": "An event regarding the game's state, such as when the game is paused by the GM.",
+  "CROSSBLADE.Events.Custom.Label": "Custom",
+  "CROSSBLADE.Events.Custom.Description": "A custom event, triggered manually by a macro."
 }

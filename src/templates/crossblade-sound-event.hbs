@@ -1,0 +1,11 @@
+<div class="crossblade-event">
+  <select name="flags.crossblade.soundLayers.{{layerIndex}}.events.{{eventIndex}}">
+    {{#each crossbladeEvents}}
+      <option value="{{this.key}}" title="{{localize this.description}}" >{{localize this.label}}</option>
+    {{/each}}
+  </select>
+  <input type="text" name="flags.crossblade.soundLayers.{{layerIndex}}.events.{{eventIndex}}" />
+  <a class="crossblade-click-control delete-event" title="{{localize 'CROSSBLADE.Sound.Event.Remove'}}">
+    <i class="fas fa-minus"></i>
+  </a>
+</div>

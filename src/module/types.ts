@@ -12,13 +12,13 @@ export interface PlaylistSoundUpdateData {
 }
 
 export abstract class CrossbladePlaylistSound extends PlaylistSound {
-  crossbladeSounds?: Map<CrossbladeEventKey, Sound[]>;
-  protected _crossbladeSounds?: Map<CrossbladeEventKey, Sound[]>;
+  cbSoundLayers?: Map<Sound, string[]>;
+  protected _crossbladeSounds?: Map<Sound, string[]>;
 }
 
 export interface SoundLayer {
   src?: string;
-  events?: CrossbladeEventKey[];
+  events?: string[];
 }
 
 //////////////
@@ -51,16 +51,14 @@ export interface DevModeModuleData extends Game.ModuleData<ModuleData> {
 }
 
 export interface CrossbladeEvent {
+  key: CrossbladeEventKey;
   label: string;
   description: string;
+  options?: Record<string, string>;
+  isCustom?: boolean;
 }
 
-export type CrossbladeEventKey =
-  | 'COMBAT_DISPOSITION_FRIENDLY'
-  | 'COMBAT_DISPOSITION_NEUTRAL'
-  | 'COMBAT_DISPOSITION_HOSTILE'
-  | 'GAME_PAUSED'
-  | 'DEFAULT';
+export type CrossbladeEventKey = 'DEFAULT' | 'COMBATANT' | /* 'COMBATANT_TAG' | */ 'GAME' | 'CUSTOM';
 
 export interface CrossbladeSoundLayer extends Record<string, string | string[]> {
   src: string;

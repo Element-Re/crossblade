@@ -91,7 +91,7 @@ Hooks.on('globalPlaylistVolumeChanged', async () => {
 });
 
 Hooks.once('ready', async () => {
-  CrossbladeController.setCurrentEvent((await getCrossbladeEventSocket()) || null);
+  CrossbladeController.setCurrentEvent((await getCrossbladeEventSocket()) || 'DEFAULT');
   CrossbladeController.crossfadePlaylists();
 });
 
@@ -108,7 +108,7 @@ Hooks.on(
           playlist?.sounds.forEach((pls: CrossbladePlaylistSound) => {
             if (pls.sound) {
               AudioHelper.preloadSound(pls.sound.src);
-              if (pls.crossbladeSounds) {
+              if (pls.cbSoundLayers) {
                 getUniqueCrossbladeSounds(pls).forEach((cbs) => {
                   AudioHelper.preloadSound(cbs.src);
                 });

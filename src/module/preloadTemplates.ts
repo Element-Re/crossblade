@@ -6,7 +6,14 @@ export async function preloadTemplates(): Promise<Handlebars.TemplateDelegate[]>
     // Templates
     'modules/crossblade/templates/crossblade-sound-config.hbs',
     'modules/crossblade/templates/crossblade-sound-layer.hbs',
+    'modules/crossblade/templates/crossblade-sound-event.hbs',
+    'modules/crossblade/templates/crossblade-sound-event-subcontrol.hbs',
   ];
-
-  return loadTemplates(templatePaths);
+  const subcontrolTemplateIndex = templatePaths.indexOf(
+    'modules/crossblade/templates/crossblade-sound-event-subcontrol.hbs',
+  );
+  return loadTemplates(templatePaths).then((templates) => {
+    Handlebars.registerPartial('crossbladeSoundEventSubcontrol', templates[subcontrolTemplateIndex]);
+    return templates;
+  });
 }

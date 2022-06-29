@@ -1,0 +1,11 @@
+{{#if options}}
+  <select class="fill event-subcontrol" name="flags.crossblade.soundLayers.{{layerIndex}}.events.{{eventIndex}}">
+    {{#each options}}
+    <option value="{{@key}}" {{#if (eq @key ../value)}}selected {{/if}}>{{localize this}}</option>
+    {{/each}}
+  </select>
+{{else if isCustom}}
+  <input class="event-subcontrol" type="text" name="flags.crossblade.soundLayers.{{layerIndex}}.events.{{eventIndex}}" value="{{value}}" />
+{{else}}
+  <span class="fill event-subcontrol"></span>
+{{/if}}
