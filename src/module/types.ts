@@ -13,12 +13,12 @@ export interface PlaylistSoundUpdateData {
 
 export abstract class CrossbladePlaylistSound extends PlaylistSound {
   cbSoundLayers?: Map<Sound, string[]>;
-  protected _crossbladeSounds?: Map<Sound, string[]>;
+  protected _cbSoundLayers?: Map<Sound, string[]>;
 }
 
 export interface SoundLayer {
   src?: string;
-  events?: string[];
+  events?: string[][];
 }
 
 //////////////

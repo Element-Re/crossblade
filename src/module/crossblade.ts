@@ -30,7 +30,7 @@ Hooks.once('init', async () => {
   // Preload Handlebars templates
   await preloadTemplates();
 
-  Object.defineProperty(PlaylistSound.prototype, 'crossbladeSounds', {
+  Object.defineProperty(PlaylistSound.prototype, 'cbSoundLayers', {
     get: PlaylistSoundOverrides.crossbladeSoundsGetter,
   });
   libWrapper.register(MODULE_ID, 'PlaylistSound.prototype.sync', PlaylistSoundOverrides.syncWrapper, 'MIXED');

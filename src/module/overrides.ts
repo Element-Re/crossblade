@@ -49,10 +49,10 @@ export namespace PlaylistOverrides {
 
 export namespace PlaylistSoundOverrides {
   export function crossbladeSoundsGetter(this: CrossbladePlaylistSound) {
-    if (!this._crossbladeSounds) {
-      this._crossbladeSounds = generateCrossbladeSounds(this);
+    if (!this._cbSoundLayers) {
+      this._cbSoundLayers = generateCrossbladeSounds(this);
     }
-    return this._crossbladeSounds;
+    return this._cbSoundLayers;
   }
   export async function syncWrapper(
     this: CrossbladePlaylistSound,
@@ -144,7 +144,7 @@ export namespace PlaylistSoundOverrides {
       oldCrossbladeSounds.forEach((oldSound) => {
         oldSound.stop();
       });
-      this._crossbladeSounds = generateCrossbladeSounds(this);
+      this._cbSoundLayers = generateCrossbladeSounds(this);
     }
     // Syncing again though it happened after calling the wrapped function. This should work...
     this.sync();

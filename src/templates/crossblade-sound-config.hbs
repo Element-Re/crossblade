@@ -1,5 +1,5 @@
 {{#*inline "eventPartial"}}
-<div class="crossblade-event" data-event="eventIndex">
+<div class="crossblade-event" data-event="{{eventIndex}}">
     <select class="crossblade-change-control change-event" name="flags.crossblade.soundLayers.{{layerIndex}}.events.{{eventIndex}}">
         {{#each crossbladeEvents}}
             <option value="{{this.key}}" title="{{localize this.description}}" {{#if (eq ../this.[0] @key )}}selected {{/if}}>{{localize this.label}}</option>
