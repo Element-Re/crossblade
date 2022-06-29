@@ -6,7 +6,7 @@ With Crossblade, you can setup playlist sounds that employ techniques sometimes 
 
 ![Crossblade Sound with Layers](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Sound%20Diagram.webp?raw=true "Crossblade Sound with Layers")
 
-A Crossblade-configured sound can be part of a larger playlist of sounds, of which any or none of the other sounds could configured with additional sound layers. Crossblade will only attempt to crossfade currently playing sounds that are configured with additional layers—any other sound will play as normal without Crossblade interfering.
+A Crossblade-configured sound can be part of a larger playlist of sounds, of which any or none of the other sounds could be configured with additional sound layers. Crossblade will only attempt to crossfade currently playing sounds that are configured with additional layers—any other sound will play as normal without Crossblade interfering.
 
 ![Crossblade Sound with Layers](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Playlist%20Diagram.webp?raw=true "Playlist with Mixed Sounds")
 
@@ -16,7 +16,7 @@ Crossblade does not come with any audio files. You will have to provide those yo
 For clarity's sake, it's best to define some terms.
 ### Core Foundry Terms
 * **Playlist:** A container for a set of sounds which defines how they should be played.
-* **Playlist Sound:** A single sound entry of a playlist. As far as Crossblade is concerned you can think of this as a single "track" or "song" in a playlist, although a playlist sound does not have to be musical in nature.
+* **Playlist Sound:** A single sound entry of a playlist. You can think of this as a single "track" or "song" in a playlist, although a playlist sound does not have to be musical in nature.
 * **Audio Source:** A reference to an audio file. Each playlist sound is associated with one.
 
 ### Crossblade-Specific Terms
