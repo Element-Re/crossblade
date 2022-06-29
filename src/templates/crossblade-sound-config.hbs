@@ -20,7 +20,7 @@
             {{#each crossbladeEvents}}
                 <div class='form-check form-check-inline' title='{{localize this.description}}'>
                     <label class='form-check-label'>
-                        <input class='form-check-input' type='checkbox' name='flags.crossblade.soundLayers.{{../index}}.events' value='{{@key}}' {{checked (inArray (getProperty ../this 'events') @key) }} />
+                        <input class='form-check-input' type='checkbox' name='flags.crossblade.soundLayers.{{../index}}.events' value='{{@key}}' {{checked (inArray (lookup ../this 'events') @key) }} />
                         {{localize this.label}}
                     </label>
                 </div>

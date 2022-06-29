@@ -1,3 +1,6 @@
+### 1.0.7
+- [Fixed] Resolved error preventing rendering the sound layer configuration dialog on systems other than 5e
+
 ### 1.0.6
 - [Changed] Updated README.md
 - [Changed] The build process should now be packaging README.md and CHANGELOG.md with the module
