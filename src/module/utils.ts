@@ -94,7 +94,7 @@ export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, v
   // If crossblade is enabled and and this PlaylistSound has crossblade sound layers
   if (game.settings.get(MODULE_ID, 'enable') === true && soundLayers.size) {
     // Default event if there's no sounds configured for this event.
-    if (![...soundLayers.values()].flat().includes(crossbladeEvent) && crossbladeEvent !== 'DEFAULT') {
+    if (crossbladeEvent !== 'DEFAULT' && ![...soundLayers.values()].flat().includes(crossbladeEvent)) {
       crossbladeEvent = 'DEFAULT';
     }
     const currentEventSounds = new Set(

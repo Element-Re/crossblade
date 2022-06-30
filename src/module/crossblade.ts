@@ -17,8 +17,9 @@ import {
   getUniqueCrossbladeSounds,
   updatePlaylistSoundSocket,
 } from './utils';
-import { DevModeApi, CrossbladePlaylistSound } from './types';
+import { DevModeApi, CrossbladePlaylistSound, CrossbladeModule } from './types';
 import { PlaylistDirectoryOverrides, PlaylistOverrides, PlaylistSoundOverrides } from './overrides';
+import { migratePlaylistSoundData, migrateCompendium, migrateWorld } from './migrations';
 
 // Initialize module
 Hooks.once('init', async () => {
@@ -93,6 +94,38 @@ Hooks.on('globalPlaylistVolumeChanged', async () => {
 Hooks.once('ready', async () => {
   CrossbladeController.setCurrentEvent((await getCrossbladeEventSocket()) || 'DEFAULT');
   CrossbladeController.crossfadePlaylists();
+
+  // Determine whether a module migration is required and feasible
+  if (!game.user?.isGM) return;
+  const crossbladeModule = game.modules.get(MODULE_ID) as CrossbladeModule | undefined;
+
+  if (!crossbladeModule) return;
+  crossbladeModule.migrations = {
+    migrateWorld: migrateWorld,
+    migrateCompendium: migrateCompendium,
+    migratePlaylistSoundData: migratePlaylistSoundData,
+  };
+  const latestMigrationVersion = game.settings.get(MODULE_ID, 'moduleMigrationVersion') as string | undefined;
+  const NEEDS_MIGRATION_VERSION = '1.0.7';
+  const COMPATIBLE_MIGRATION_VERSION = '1.0.0';
+  const totalDocuments = game.playlists?.size ?? 0;
+  if (!latestMigrationVersion && totalDocuments === 0)
+    return game.settings.set(MODULE_ID, 'moduleMigrationVersion', crossbladeModule.data.version);
+  const needsMigration = !latestMigrationVersion || isNewerVersion(NEEDS_MIGRATION_VERSION, latestMigrationVersion);
+  if (!needsMigration) return;
+
+  // Perform the migration
+  if (latestMigrationVersion && isNewerVersion(COMPATIBLE_MIGRATION_VERSION, latestMigrationVersion)) {
+    ui.notifications.error(game.i18n.localize('CROSSBLADE.Migration.VersionTooOldWarning'), { permanent: true });
+  }
+  Dialog.confirm({
+    title: game.i18n.localize(`CROSSBLADE.Migration.Needed.Dialog.Title`),
+    content: game.i18n.localize(`Crossblade.Migration.Needed.Dialog.Content`),
+    // TODO: This seems to crash the client when more than 30 or so sounds need to be migrated,
+    // due to updates triggering a sync and preloading all sounds and layers, causing memory to overflow.
+    // The migrations do complete successfully though...
+    yes: () => crossbladeModule.migrations.migrateWorld(),
+  });
 });
 
 // Right-click menu context hook for playlists

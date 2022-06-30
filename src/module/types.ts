@@ -1,4 +1,13 @@
 import { ModuleData } from '@league-of-foundry-developers/foundry-vtt-types/src/foundry/common/packages.mjs';
+import { migratePlaylistSoundData, migrateCompendium, migrateWorld } from './migrations';
+
+export interface CrossbladeModule extends Game.ModuleData<ModuleData> {
+  migrations: {
+    migrateWorld: typeof migrateWorld;
+    migrateCompendium: typeof migrateCompendium;
+    migratePlaylistSoundData: typeof migratePlaylistSoundData;
+  };
+}
 
 export interface PlaylistUpdateData {
   playing?: boolean;

@@ -27,5 +27,10 @@
   "CROSSBLADE.Events.Game.Label": "Game",
   "CROSSBLADE.Events.Game.Description": "An event regarding the game's state, such as when the game is paused by the GM.",
   "CROSSBLADE.Events.Custom.Label": "Custom",
-  "CROSSBLADE.Events.Custom.Description": "A custom event, triggered manually by a macro."
+  "CROSSBLADE.Events.Custom.Description": "A custom event, triggered manually by a macro.",
+  "CROSSBLADE.Migration.VersionTooOldWarning": "Previous Crossblade version is too old to migrate data.",
+  "CROSSBLADE.Migration.Begin": "Beginning migration of Crossblade data...",
+  "CROSSBLADE.Migration.End": "Crossblade data migration completed.",
+  "CROSSBLADE.Migration.Needed.Dialog.Title": "Crossblade Data Migration Needed",
+  "Crossblade.Migration.Needed.Dialog.Content": "A new update to Crossblade requires a migration of sound data. Proceed?"
 }
