@@ -58,97 +58,139 @@ export namespace PlaylistSoundOverrides {
     this: CrossbladePlaylistSound,
     wrapped: (...args: never[]) => Sound | Promise<Sound> | undefined,
   ) {
-    const layerSounds = new Set(this._cbSoundLayers?.keys());
-    if (!this.sound || this.sound.failed || !layerSounds.size) return wrapped();
-    // In case of duplicate
-    layerSounds.delete(this.sound);
+    debug('in syncWrapper', this.name);
+    if (!this.sound || this.sound.failed || !this._cbSoundLayers?.size) return wrapped();
+    const baseSound = this.sound;
+    // Process base sound and all layers together
+    const layerSounds = new Set([baseSound, ...(this._cbSoundLayers.keys() ?? [])]);
     const fade = this.fadeDuration;
 
-    // Conclude current playback
     if (!this.playing) {
+      // Conclude current playback
       const stopPromises: Promise<Sound | void>[] = [];
-
-      if (fade && !this.data.pausedTime && this.sound.playing) {
-        stopPromises.push(this.sound.fade(0, { duration: fade }).then(() => this.sound?.stop()));
-      } else this.sound.stop();
       for (const layerSound of layerSounds) {
-        if (fade && !this.data.pausedTime && layerSound.playing)
+        if (fade && !this.data.pausedTime)
           stopPromises.push(
             layerSound.fade(0, { duration: fade }).then(() => {
-              layerSound.stop();
+              if (!this.playing) layerSound.stop();
             }),
           );
         else layerSound.stop();
       }
-      return Promise.all(stopPromises).then(() => {
-        return;
-      });
-    }
-    const playPromises: Promise<Sound | void>[] = [];
-    // Determine base sound playback configuration
-    const basePlayback: Sound.PlayOptions = {
-      loop: this.data.repeat,
-      volume: getCrossfadeVolume(this, this.sound),
-      fade: fade,
-    };
+      return Promise.all(stopPromises);
+    } else {
+      // for (const layerSound of layerSounds) {
+      //   if (!layerSound.loaded) await (layerSound.loading ?? layerSound.load());
+      // }
+      // Begin playback
+      for (const layerSound of layerSounds) {
+        // Determine layer playback configuration
+        const playback: Sound.PlayOptions = {
+          loop: this.data.repeat,
+          fade: fade,
+        };
+        // TODO: Should we really be processing the base sound as part of this loop?
+        if (this.data.pausedTime && baseSound === layerSound) {
+          playback.offset = this.data.pausedTime;
+        } else if (baseSound !== layerSound) {
+          // Getters to ensure value is current for when accessed
+          Object.defineProperty(playback, 'offset', { get: () => this.sound?.currentTime });
+        }
+        Object.defineProperty(playback, 'volume', { get: () => getCrossfadeVolume(this, layerSound) });
+        const loadOrPlay = async () => {
+          await layerSound.loading;
+          // Load and autoplay layer sound, play directly if already loaded and not playing, or just fade to the proper volume.
+          if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
+          else if (!layerSound.playing) layerSound.play(playback);
+          else !layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
+        };
 
-    if (this.data.pausedTime && this.playing && !this.sound.playing) basePlayback.offset = this.data.pausedTime;
-
-    // Load and autoplay base sound, or play directly if already loaded
-    if (!this.sound.loaded) playPromises.push(this.sound.load());
-    playPromises.concat([...layerSounds].map((sound) => sound.load()));
-    // Process each Crossblade sound layer
-    for (const layerSound of layerSounds) {
-      const volume = getCrossfadeVolume(this, layerSound);
-      // Determine layer playback configuration
-      const playback: Sound.PlayOptions = {
-        loop: this.data.repeat,
-        volume: volume,
-        fade: fade,
-      };
-      Object.defineProperty(playback, 'offset', { get: () => this.sound?.currentTime || 0 });
-      // Load and autoplay layer sound, or play directly if already loaded
-      if (!this.sound.playing) {
-        // The base sound is not playing, prepare for when it starts
-        this.sound.on(
-          'start',
-          (startedSound) => {
-            if (startedSound.playing) {
-              layerSound.play(playback);
-            }
-          },
-          { once: true },
-        );
-        if (!layerSound.loaded) playPromises.push(layerSound.load());
-      } else {
-        // The base sound is playing, start this layer sound ASAP
-        if (!layerSound.loaded) playPromises.push(layerSound.load({ autoplay: true, autoplayOptions: playback }));
-        else layerSound.play(playback);
+        if (layerSound !== baseSound) {
+          await baseSound.loading;
+          loadOrPlay();
+        } else loadOrPlay();
+        // if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
+        // else if (!layerSound.playing) layerSound.play(playback);
+        // else !layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
       }
     }
-    return Promise.all(playPromises).then(() => {
-      return this.sound?.play(basePlayback);
-    });
   }
-  export function _onUpdateWrapper(
-    this: CrossbladePlaylistSound,
-    wrapped: (...args: unknown[]) => void,
-    ...args: unknown[]
-  ) {
+  export function _onUpdateWrapper(this: CrossbladePlaylistSound, ...args: unknown[]) {
     const changed = args[0] as { path?: string; flags?: { crossblade?: { soundLayers?: [] } } };
     debug('_onUpdateWrapper', changed);
     const oldCrossbladeSounds = getUniqueCrossbladeSounds(this);
     if (this.sound) oldCrossbladeSounds.delete(this.sound);
-    const result = wrapped(...args);
+    Object.getPrototypeOf(PlaylistSound).prototype._onUpdate.apply(this, args);
+    if ('path' in changed) {
+      if (this.sound) this.sound.stop();
+      this.sound = this._createSound();
+    }
+    if ('sort' in changed && this.parent) {
+      _clearPlaybackOrder.bind(this.parent)();
+    }
     if ('path' in changed || (changed.flags?.crossblade && 'soundLayers' in changed.flags.crossblade)) {
       oldCrossbladeSounds.forEach((oldSound) => {
         oldSound.stop();
       });
       this._cbSoundLayers = generateCrossbladeSounds(this);
     }
-    // Syncing again though it happened after calling the wrapped function. This should work...
     this.sync();
-    return result;
+  }
+
+  function _clearPlaybackOrder(this: Playlist) {
+    this._playbackOrder = undefined;
+  }
+
+  export function _fadeInWrapper(this: CrossbladePlaylistSound, sound: Sound) {
+    if (!sound.node) return;
+    const fade = this.fadeDuration;
+    if (!fade || sound.pausedTime) return;
+    sound.fade(getCrossfadeVolume(this, sound), { duration: fade, from: 0 });
+  }
+  export async function _onStartWrapper(this: CrossbladePlaylistSound, sound: Sound) {
+    // if (!this.sound) return;
+
+    if (!this.playing) {
+      return sound.stop();
+    }
+
+    // Apply fade timings
+    const fade = this.fadeDuration;
+    if (fade) {
+      this._fadeIn(sound);
+      if (!this.data.repeat && Number.isFinite(sound.duration)) {
+        sound.schedule(this._fadeOut.bind(this), Number(sound.duration) - fade / 1000);
+      }
+    }
+    if (sound === this.sound) {
+      // Playlist-level orchestration actions
+      return this.parent?._onSoundStart(this);
+    }
+    // if (!this.sound) return;
+    // debug('_onStartWrapper', this.name, this.playing);
+    // const allSounds = new Set(this._cbSoundLayers?.keys());
+    // if (!this.playing) {
+    //   for (const sound of allSounds) {
+    //     debug(sound.src, this.playing);
+    //     await sound.loading;
+    //     sound.stop();
+    //   }
+    //   return;
+    // }
+
+    // // Apply fade timings
+    // const fade = this.fadeDuration;
+    // if (fade) {
+    //   for (const s of allSounds) {
+    //     this._fadeIn(s);
+    //     if (!this.data.repeat && Number.isFinite(s.duration)) {
+    //       s.schedule(this._fadeOut.bind(this), Number(s.duration) - fade / 1000);
+    //     }
+    //   }
+    // }
+
+    // // Playlist-level orchestration actions
+    // return this.parent?._onSoundStart(this);
   }
 }
 

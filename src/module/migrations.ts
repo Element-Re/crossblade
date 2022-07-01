@@ -138,7 +138,7 @@ const _migratePlaylistSoundCrossbladeEvents = (
   if (!soundLayers?.length) return updateData;
   const updatedLayers = soundLayers
     // Only update layers with string events
-    .filter((layer) => layer.events?.some((event) => typeof event === 'string'))
+    //.filter((layer) => layer.events?.some((event) => typeof event === 'string'))
     .map((layer) => {
       return {
         src: layer.src,

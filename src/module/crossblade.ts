@@ -15,7 +15,6 @@ import {
   crossfadePlaylistsSocket,
   isLeadGM,
   getUniqueCrossbladeSounds,
-  updatePlaylistSoundSocket,
 } from './utils';
 import { DevModeApi, CrossbladePlaylistSound, CrossbladeModule } from './types';
 import { PlaylistDirectoryOverrides, PlaylistOverrides, PlaylistSoundOverrides } from './overrides';
@@ -39,8 +38,15 @@ Hooks.once('init', async () => {
     MODULE_ID,
     'PlaylistSound.prototype._onUpdate',
     PlaylistSoundOverrides._onUpdateWrapper,
-    'WRAPPER',
+    'OVERRIDE',
   );
+  libWrapper.register(
+    MODULE_ID,
+    'PlaylistSound.prototype._onStart',
+    PlaylistSoundOverrides._onStartWrapper,
+    'OVERRIDE',
+  );
+  libWrapper.register(MODULE_ID, 'PlaylistSound.prototype._fadeIn', PlaylistSoundOverrides._fadeInWrapper, 'OVERRIDE');
   libWrapper.register(MODULE_ID, 'Playlist.prototype._onSoundStart', PlaylistOverrides._onSoundStartWrapper, 'WRAPPER');
   libWrapper.register(MODULE_ID, 'Playlist.prototype._onDelete', PlaylistOverrides._onDeleteWrapper, 'WRAPPER');
   libWrapper.register(
@@ -69,13 +75,13 @@ Hooks.on('updateCombat', async () => {
   await updatePlaylistSocket(getCrossbladeEvent());
 });
 
-Hooks.on('updatePlaylist', async (playlist: Playlist) => {
-  await updatePlaylistSocket(getCrossbladeEvent(), playlist);
-});
+// Hooks.on('updatePlaylist', async (playlist: Playlist) => {
+//   await updatePlaylistSocket(getCrossbladeEvent(), playlist);
+// });
 
-Hooks.on('updatePlaylistSound', async (sound: PlaylistSound) => {
-  await updatePlaylistSoundSocket(getCrossbladeEvent(), sound);
-});
+// Hooks.on('updatePlaylistSound', async (sound: PlaylistSound) => {
+//   await updatePlaylistSoundSocket(getCrossbladeEvent(), sound);
+// });
 
 Hooks.on('deleteCombat', async () => {
   await updateCrossbladeEventSocket(getCrossbladeEvent());
@@ -120,9 +126,9 @@ Hooks.once('ready', async () => {
   }
   Dialog.confirm({
     title: game.i18n.localize(`CROSSBLADE.Migration.Needed.Dialog.Title`),
-    content: game.i18n.localize(`Crossblade.Migration.Needed.Dialog.Content`),
+    content: game.i18n.localize(`CROSSBLADE.Migration.Needed.Dialog.Content`),
     // TODO: This seems to crash the client when more than 30 or so sounds need to be migrated,
-    // due to updates triggering a sync and preloading all sounds and layers, causing memory to overflow.
+    // due to updates triggering a sync and preloading all sounds and layers, causing the heap to run out of memory.
     // The migrations do complete successfully though...
     yes: () => crossbladeModule.migrations.migrateWorld(),
   });

@@ -32,5 +32,5 @@
   "CROSSBLADE.Migration.Begin": "Beginning migration of Crossblade data...",
   "CROSSBLADE.Migration.End": "Crossblade data migration completed.",
   "CROSSBLADE.Migration.Needed.Dialog.Title": "Crossblade Data Migration Needed",
-  "Crossblade.Migration.Needed.Dialog.Content": "A new update to Crossblade requires a migration of sound data. Proceed?"
+  "CROSSBLADE.Migration.Needed.Dialog.Content": "A new update to Crossblade requires a migration of sound data. Proceed?"
 }
