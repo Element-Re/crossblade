@@ -4,10 +4,11 @@ import { CrossbladeModule } from './types';
 import { debug, log, MODULE_ID } from './utils';
 
 /**
- * Perform a system migration for the entire World, applying migrations for Actors, Items, and Compendium packs
+ * Perform a module migration for the entire World, applying migrations for Playlists and Compendium packs
  * @returns {Promise}      A Promise which resolves once the migration is completed
  */
-export const migrateWorld = async function () {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const migrateWorld = async function (): Promise<any> {
   const module = game.modules.get(MODULE_ID) as CrossbladeModule;
   if (!module) return;
   const version = module.data.version;
@@ -18,7 +19,7 @@ export const migrateWorld = async function () {
     try {
       const updateData = migratePlaylistSoundData(pls.toObject());
       if (!foundry.utils.isObjectEmpty(updateData)) {
-        console.log(`Migrating PlaylistSound document ${pls.name}`);
+        log(`Migrating ${pls.documentName} ${pls.name} of ${pls.parent?.documentName} ${pls.parent?.name}`);
         await pls.update(updateData, { enforceTypes: false });
       }
     } catch (err) {
@@ -29,12 +30,12 @@ export const migrateWorld = async function () {
     }
   }
 
-  // // Migrate World Compendium Packs
-  // for (let p of game.packs) {
-  //   if (p.metadata.package !== 'world') continue;
-  //   if (!['Actor', 'Item', 'Scene'].includes(p.documentName)) continue;
-  //   await migrateCompendium(p);
-  // }
+  // Migrate World Compendium Packs
+  for (const p of game.packs) {
+    if (p.metadata.package !== 'world') continue;
+    if (p.documentName !== 'Playlist') continue;
+    await migrateCompendium(p);
+  }
 
   // Set the migration as complete
   game.settings.set(MODULE_ID, 'moduleMigrationVersion', version);
@@ -48,46 +49,41 @@ export const migrateWorld = async function () {
  * @param {CompendiumCollection} pack  Pack to be migrated.
  * @returns {Promise}
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const migrateCompendium = async function (pack: Compendium<any, any, any>) {
-  debug('migrating Pack...', pack);
-  // const documentName = pack.documentName;
-  // if (!['Actor', 'Item', 'Scene'].includes(documentName)) return;
-  // const migrationData = await getMigrationData();
-  // // Unlock the pack for editing
-  // const wasLocked = pack.locked;
-  // await pack.configure({ locked: false });
-  // // Begin by requesting server-side data model migration and get the migrated content
-  // await pack.migrate();
-  // const documents = await pack.getDocuments();
-  // // Iterate over compendium entries - applying fine-tuned migration functions
-  // for (let doc of documents) {
-  //   let updateData = {};
-  //   try {
-  //     switch (documentName) {
-  //       case 'Actor':
-  //         updateData = migratePlaylistSoundData(doc.toObject(), migrationData);
-  //         break;
-  //       case 'Item':
-  //         updateData = migrateItemData(doc.toObject(), migrationData);
-  //         break;
-  //       case 'Scene':
-  //         updateData = migrateSceneData(doc.data, migrationData);
-  //         break;
-  //     }
-  //     // Save the entry, if data was changed
-  //     if (foundry.utils.isObjectEmpty(updateData)) continue;
-  //     await doc.update(updateData);
-  //     console.log(`Migrated ${documentName} document ${doc.name} in Compendium ${pack.collection}`);
-  //   } catch (err) {
-  //     // Handle migration failures
-  //     err.message = `Failed dnd5e system migration for document ${doc.name} in pack ${pack.collection}: ${err.message}`;
-  //     console.error(err);
-  //   }
-  // }
-  // // Apply the original locked status for the pack
-  // await pack.configure({ locked: wasLocked });
-  // console.log(`Migrated all ${documentName} documents from Compendium ${pack.collection}`);
+export const migrateCompendium = async function (
+  pack: CompendiumCollection<CompendiumCollection.Metadata>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  debug(`migrating ${pack.documentName} Pack ${pack.name} ...`);
+  const documentName = pack.documentName;
+  if (documentName !== 'Playlist') return;
+  // Unlock the pack for editing
+  const wasLocked = pack.locked;
+  await pack.configure({ locked: false });
+  // Begin by requesting server-side data model migration and get the migrated content
+  const playlists = (await pack.getDocuments()) as StoredDocument<Playlist>[];
+  // Iterate over compendium entries - applying fine-tuned migration functions
+  for (const playlist of playlists) {
+    for (const pls of playlist.sounds) {
+      try {
+        const updateData = migratePlaylistSoundData(pls.toObject());
+        // Save the entry, if data was changed
+        if (foundry.utils.isObjectEmpty(updateData)) continue;
+        await pls.update(updateData);
+        log(
+          `Migrated Crossblade data for ${pls.documentName} ${pls.name} of ${playlist.documentName} ${playlist.name} in Compendium ${pack.collection}`,
+        );
+      } catch (err) {
+        // Handle migration failures
+        if (err instanceof Error) {
+          err.message = `Failed Crossblade data migration for ${pls.documentName} ${pls.name} of ${playlist.documentName} ${playlist.name} in Compendium ${pack.collection}: ${err.message}`;
+        }
+        console.error(err);
+      }
+    }
+  }
+  // Apply the original locked status for the pack
+  await pack.configure({ locked: wasLocked });
+  log(`Migrated all ${documentName} documents from Compendium ${pack.collection}`);
 };
 
 interface CrossbladePlaylistSoundDataProperties extends PropertiesToSource<PlaylistSoundDataProperties> {
@@ -119,14 +115,14 @@ interface CrossbladePlaylistSoundUpdateData {
  * @returns {object}                The updateData to apply
  */
 export const migratePlaylistSoundData = (plsData: CrossbladePlaylistSoundDataProperties): object => {
-  log('migrating pls', plsData);
+  debug('migratePlaylistSoundData', plsData);
   const updateData = {} as CrossbladePlaylistSoundUpdateData;
 
   // Actor Data Updates
   if (plsData.flags) {
     _migratePlaylistSoundCrossbladeEvents(plsData, updateData);
   }
-
+  debug('updateData', updateData);
   return updateData;
 };
 
@@ -135,10 +131,10 @@ const _migratePlaylistSoundCrossbladeEvents = (
   updateData: CrossbladePlaylistSoundUpdateData,
 ) => {
   const soundLayers = plsData.flags.crossblade?.soundLayers;
-  if (!soundLayers?.length) return updateData;
+  if (!soundLayers?.length) return;
   const updatedLayers = soundLayers
     // Only update layers with string events
-    //.filter((layer) => layer.events?.some((event) => typeof event === 'string'))
+    .filter((layer) => layer.events?.some((event) => typeof event === 'string'))
     .map((layer) => {
       return {
         src: layer.src,
@@ -163,6 +159,4 @@ const _migratePlaylistSoundCrossbladeEvents = (
   if (updatedLayers.length) {
     updateData.flags = { crossblade: { soundLayers: updatedLayers } };
   }
-  log('updateData', updateData);
-  return updateData;
 };

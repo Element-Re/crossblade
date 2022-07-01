@@ -164,10 +164,6 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
               // Easier to check if an event matches
               .map((event) => event.slice(0, 2).join(': ')),
           );
-          // sl.events.forEach((e) => {
-          //   const eventSounds = crossbladeSounds.get(e) ?? [];
-          //   crossbladeSounds.set(e, eventSounds.concat(layerSound));
-          // });
         }
       }
     });
@@ -225,13 +221,12 @@ Hooks.once('socketlib.ready', () => {
   socket.register('crossfadeSounds', _crossfadeSoundsSocket);
   socket.register('getCrossbladeEvent', _getCrossbladeEventSocket);
   socket.register('updateCrossbladeEventSocket', _updateCrossbladeEventSocket);
-  socket.register('updatePlaylistSocket', _updatePlaylistSocket);
-  socket.register('updatePlaylistSoundSocket', _updatePlaylistSoundSocket);
+  socket.register('updatePlaylistSocket', _crossfadePlaylistSocket);
+  socket.register('updatePlaylistSoundSocket', _crossfadePlaylistSoundSocket);
 });
 
 export async function crossfadePlaylistsSocket(...playlistIds: string[]) {
   debug('crossfadePlaylistsSocket', playlistIds);
-
   return socket?.executeForEveryone(_crossfadePlaylistsSocket, ...playlistIds);
 }
 
@@ -278,29 +273,29 @@ function _updateCrossbladeEventSocket(status: string) {
   CrossbladeController.crossfadePlaylists();
 }
 
-export async function updatePlaylistSocket(status: string, ...playlists: Playlist[]) {
-  debug('updatePlaylistSocket', status, playlists);
+export async function crossfadePlaylistSocket(status: string, ...playlists: Playlist[]) {
+  debug('crossfadePlaylistSocket', status, playlists);
   return socket?.executeForEveryone(
-    _updatePlaylistSocket,
+    _crossfadePlaylistSocket,
     status,
     playlists.map((p) => p.id),
   );
 }
 
-function _updatePlaylistSocket(status: string, ...playlistIds: string[]) {
-  debug('_updatePlaylistSocket', status, playlistIds);
+function _crossfadePlaylistSocket(status: string, ...playlistIds: string[]) {
+  debug('_crossfadePlaylistSocket', status, playlistIds);
   CrossbladeController.setCurrentEvent(status);
   const playlists = game.playlists?.filter((p) => playlistIds.includes(p.id)) ?? [];
   CrossbladeController.crossfadePlaylists(...playlists);
 }
 
-export async function updatePlaylistSoundSocket(status: string, ...sounds: PlaylistSound[]) {
-  debug('updatePlaylistSoundSocket', status, sounds);
-  return socket?.executeForEveryone(_updatePlaylistSoundSocket, status, ...sounds.map((s) => s.uuid));
+export async function crossfadePlaylistSoundSocket(status: string, ...sounds: PlaylistSound[]) {
+  debug('crossfadePlaylistSoundSocket', status, sounds);
+  return socket?.executeForEveryone(_crossfadePlaylistSoundSocket, status, ...sounds.map((s) => s.uuid));
 }
 
-function _updatePlaylistSoundSocket(status: string, ...soundUuids: string[]) {
-  debug('_updatePlaylistSoundSocket', status, soundUuids);
+function _crossfadePlaylistSoundSocket(status: string, ...soundUuids: string[]) {
+  debug('_crossfadePlaylistSoundSocket', status, soundUuids);
   CrossbladeController.setCurrentEvent(status);
 
   Promise.all(
@@ -328,7 +323,8 @@ export class CrossbladeController {
     return playlists?.filter((p) =>
       p.sounds.find((s) => {
         const cbps = s as CrossbladePlaylistSound;
-        if (cbps.cbSoundLayers && cbps.cbSoundLayers.size > 0) return true;
+        const soundLayers = cbps.cbSoundLayers;
+        if (soundLayers && soundLayers.size > 0) return true;
         else return false;
       }),
     );
@@ -357,25 +353,6 @@ export class CrossbladeController {
       if (cbps.cbSoundLayers && cbps.sound) {
         log('Handling crossfade for', `🎵${pls.name}🎵`);
         cbps.sync();
-        // if (!cbps.sound.loaded) await cbps.sound.load();
-        // const uniqueSounds = getUniqueCrossbladeSounds(pls);
-        // // Ensure all crossblade sounds are loaded before attempting crossfade...
-        // await Promise.all([...uniqueSounds].map(async (s) => s.load()));
-        // // Set *should* filter this out if one of the layers is the same as the base sound
-        // if (pls.sound) uniqueSounds.add(pls.sound);
-        // uniqueSounds.forEach((s) => {
-        //   debug(s.src, s.currentTime);
-        //   if (!s.playing)
-        //     // TODO: This is breaking the single responsibility principle but is the only way
-        //     // I've found to get sound layers to crossfade properly when the sound is playing when the client starts.
-        //     s.play({
-        //       volume: getCrossfadeVolume(pls, s),
-        //       fade: pls.fadeDuration,
-        //       loop: pls.data.repeat,
-        //       offset: pls.sound?.currentTime,
-        //     });
-        //   else s.fade(getCrossfadeVolume(pls, s), { duration: pls.fadeDuration });
-        // });
       }
     });
     debug('...done crossfading sounds', playlistSounds);

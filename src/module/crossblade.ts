@@ -7,7 +7,6 @@ import {
   log,
   debug,
   inArray,
-  updatePlaylistSocket,
   getCrossbladeEvent,
   updateCrossbladeEventSocket,
   getCrossbladeEventSocket,
@@ -72,16 +71,8 @@ Hooks.once('devModeReady', (api: DevModeApi) => {
 });
 
 Hooks.on('updateCombat', async () => {
-  await updatePlaylistSocket(getCrossbladeEvent());
+  await updateCrossbladeEventSocket(getCrossbladeEvent());
 });
-
-// Hooks.on('updatePlaylist', async (playlist: Playlist) => {
-//   await updatePlaylistSocket(getCrossbladeEvent(), playlist);
-// });
-
-// Hooks.on('updatePlaylistSound', async (sound: PlaylistSound) => {
-//   await updatePlaylistSoundSocket(getCrossbladeEvent(), sound);
-// });
 
 Hooks.on('deleteCombat', async () => {
   await updateCrossbladeEventSocket(getCrossbladeEvent());
@@ -113,7 +104,6 @@ Hooks.once('ready', async () => {
   };
   const latestMigrationVersion = game.settings.get(MODULE_ID, 'moduleMigrationVersion') as string | undefined;
   const NEEDS_MIGRATION_VERSION = '1.0.7';
-  const COMPATIBLE_MIGRATION_VERSION = '1.0.0';
   const totalDocuments = game.playlists?.size ?? 0;
   if (!latestMigrationVersion && totalDocuments === 0)
     return game.settings.set(MODULE_ID, 'moduleMigrationVersion', crossbladeModule.data.version);
@@ -121,17 +111,7 @@ Hooks.once('ready', async () => {
   if (!needsMigration) return;
 
   // Perform the migration
-  if (latestMigrationVersion && isNewerVersion(COMPATIBLE_MIGRATION_VERSION, latestMigrationVersion)) {
-    ui.notifications.error(game.i18n.localize('CROSSBLADE.Migration.VersionTooOldWarning'), { permanent: true });
-  }
-  Dialog.confirm({
-    title: game.i18n.localize(`CROSSBLADE.Migration.Needed.Dialog.Title`),
-    content: game.i18n.localize(`CROSSBLADE.Migration.Needed.Dialog.Content`),
-    // TODO: This seems to crash the client when more than 30 or so sounds need to be migrated,
-    // due to updates triggering a sync and preloading all sounds and layers, causing the heap to run out of memory.
-    // The migrations do complete successfully though...
-    yes: () => crossbladeModule.migrations.migrateWorld(),
-  });
+  crossbladeModule.migrations.migrateWorld();
 });
 
 // Right-click menu context hook for playlists

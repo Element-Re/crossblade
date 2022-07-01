@@ -79,9 +79,6 @@ export namespace PlaylistSoundOverrides {
       }
       return Promise.all(stopPromises);
     } else {
-      // for (const layerSound of layerSounds) {
-      //   if (!layerSound.loaded) await (layerSound.loading ?? layerSound.load());
-      // }
       // Begin playback
       for (const layerSound of layerSounds) {
         // Determine layer playback configuration
@@ -101,7 +98,9 @@ export namespace PlaylistSoundOverrides {
           await layerSound.loading;
           // Load and autoplay layer sound, play directly if already loaded and not playing, or just fade to the proper volume.
           if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
-          else if (!layerSound.playing) layerSound.play(playback);
+          // Keep layers synced.
+          // TODO: In the event that a currently playing layer is out of sync, it will immediately mute instead of fading out here.
+          else if (!layerSound.playing || layerSound.currentTime !== baseSound.currentTime) layerSound.play(playback);
           else !layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
         };
 
@@ -109,9 +108,6 @@ export namespace PlaylistSoundOverrides {
           await baseSound.loading;
           loadOrPlay();
         } else loadOrPlay();
-        // if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
-        // else if (!layerSound.playing) layerSound.play(playback);
-        // else !layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
       }
     }
   }
@@ -148,8 +144,6 @@ export namespace PlaylistSoundOverrides {
     sound.fade(getCrossfadeVolume(this, sound), { duration: fade, from: 0 });
   }
   export async function _onStartWrapper(this: CrossbladePlaylistSound, sound: Sound) {
-    // if (!this.sound) return;
-
     if (!this.playing) {
       return sound.stop();
     }
@@ -166,31 +160,6 @@ export namespace PlaylistSoundOverrides {
       // Playlist-level orchestration actions
       return this.parent?._onSoundStart(this);
     }
-    // if (!this.sound) return;
-    // debug('_onStartWrapper', this.name, this.playing);
-    // const allSounds = new Set(this._cbSoundLayers?.keys());
-    // if (!this.playing) {
-    //   for (const sound of allSounds) {
-    //     debug(sound.src, this.playing);
-    //     await sound.loading;
-    //     sound.stop();
-    //   }
-    //   return;
-    // }
-
-    // // Apply fade timings
-    // const fade = this.fadeDuration;
-    // if (fade) {
-    //   for (const s of allSounds) {
-    //     this._fadeIn(s);
-    //     if (!this.data.repeat && Number.isFinite(s.duration)) {
-    //       s.schedule(this._fadeOut.bind(this), Number(s.duration) - fade / 1000);
-    //     }
-    //   }
-    // }
-
-    // // Playlist-level orchestration actions
-    // return this.parent?._onSoundStart(this);
   }
 }
 
