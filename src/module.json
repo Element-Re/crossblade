@@ -22,9 +22,6 @@
   "dependencies": [
     {
       "name": "lib-wrapper"
-    },
-    {
-      "name": "socketlib"
     }
   ],
   "languages": [
