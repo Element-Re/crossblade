@@ -1,11 +1,4 @@
-import {
-  CrossbladeEvent,
-  CrossbladeEventKey,
-  CrossbladePlaylistSound,
-  DevModeModuleData,
-  Socket,
-  SoundLayer,
-} from './types';
+import { CrossbladeEvent, CrossbladeEventKey, CrossbladePlaylistSound, DevModeModuleData, SoundLayer } from './types';
 
 export const CROSSBLADE_EVENTS: Record<CrossbladeEventKey, CrossbladeEvent> = {
   DEFAULT: {
@@ -23,12 +16,6 @@ export const CROSSBLADE_EVENTS: Record<CrossbladeEventKey, CrossbladeEvent> = {
       HOSTILE: 'TOKEN.HOSTILE',
     },
   },
-  // COMBATANT_TAG: {
-  //   key: 'COMBATANT', // Technically the same as the normal Combatant event
-  //   label: 'CROSSBLADE.Events.CombatantTag.Label',
-  //   description: 'CROSSBLADE.Events.CombatantTag.Description',
-  //   isCustom: true,
-  // },
   GAME: {
     key: 'GAME',
     label: 'CROSSBLADE.Events.Game.Label',
@@ -41,7 +28,7 @@ export const CROSSBLADE_EVENTS: Record<CrossbladeEventKey, CrossbladeEvent> = {
     key: 'CUSTOM',
     label: 'CROSSBLADE.Events.Custom.Label',
     description: 'CROSSBLADE.Events.Custom.Description',
-    isCustom: true,
+    manualEntry: true,
   },
 };
 
@@ -74,9 +61,12 @@ function createCrossbladeSound(this: CrossbladePlaylistSound, src: string) {
   return sound;
 }
 
-export function getCrossbladeEvent(): string {
-  if (game.settings.get(MODULE_ID, 'combatPause') === true && game.paused) return 'GAME: PAUSED';
-  if (!game.combat?.started) return game.paused ? 'GAME_PAUSED' : 'DEFAULT';
+function _determineCrossbladeEvent(): string {
+  const combatPauseEvent = game.settings.get(MODULE_ID, 'combatPauseEvent') as boolean;
+  const combatEvents = game.settings.get(MODULE_ID, 'combatEvents') as boolean;
+
+  if (combatPauseEvent && game.paused) return 'GAME: PAUSED';
+  if (!combatEvents || !game.combat?.started) return game.paused ? 'GAME_PAUSED' : 'DEFAULT';
   switch (game.combat?.combatant?.token?.data.disposition) {
     case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
       return 'COMBATANT: FRIENDLY';
@@ -90,16 +80,24 @@ export function getCrossbladeEvent(): string {
 }
 
 export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, volume: number = pls.volume) {
-  let crossbladeEvent = CrossbladeController.getCurrentEvent();
   const soundLayers = pls.cbSoundLayers ?? new Map<Sound, string[]>();
   // Default volume --- Only activate if this is the base sound;
   let fadeVolume = pls.sound === sound ? volume : 0;
   // If crossblade is enabled and and this PlaylistSound has crossblade sound layers
   if (game.settings.get(MODULE_ID, 'enable') === true && soundLayers.size) {
-    // Default event if there's no sounds configured for this event.
-    if (crossbladeEvent !== 'DEFAULT' && ![...soundLayers.values()].flat().includes(crossbladeEvent)) {
+    let crossbladeEvent = CrossbladeController.event;
+    debug('Crossblade Event:', crossbladeEvent);
+    const customEvent = CrossbladeController.customEvent;
+    debug('Custom Event:', customEvent);
+    if (customEvent && [...soundLayers.values()].flat().includes(customEvent)) {
+      // Use custom event if it applies to at least one layer
+      crossbladeEvent = customEvent;
+    } else if (crossbladeEvent !== 'DEFAULT' && ![...soundLayers.values()].flat().includes(crossbladeEvent)) {
+      // Default event if current event applies to no layers
       crossbladeEvent = 'DEFAULT';
     }
+    debug('Crossblade Event (Final)', crossbladeEvent);
+    debug('Sound Layer Events:', [...soundLayers.values()].flat());
     const currentEventSounds = new Set(
       [...soundLayers.entries()].filter((entry) => entry[1].includes(crossbladeEvent)).map((entry) => entry[0]),
     );
@@ -162,7 +160,7 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
               .filter((event) => Array.isArray(event) && event.length)
               // Maps ['COMBATANT', 'HOSTILE'] as 'COMBATANT: HOSTILE'
               // Easier to check if an event matches
-              .map((event) => event.slice(0, 2).join(': ')),
+              .map((event) => event.slice(0, 2).join(': ').toUpperCase()),
           );
         }
       }
@@ -204,118 +202,22 @@ export function debug(...args: unknown[]) {
   } catch (e) {}
 }
 
-export function hasOwnProperty<X extends object, Y extends PropertyKey>(
-  obj: X,
-  prop: Y,
-): obj is X & Record<Y, unknown> {
-  return obj.hasOwnProperty(prop);
+export function getCustomEvent() {
+  return (game.settings.get(MODULE_ID, 'customEvent') as string | undefined)?.toUpperCase();
 }
 
-/// Sockets
-export let socket: Socket | undefined;
-
-Hooks.once('socketlib.ready', () => {
-  debug('socketlib.ready');
-  socket = socketlib.registerModule(MODULE_ID);
-  socket.register('crossfadePlaylists', _crossfadePlaylistsSocket);
-  socket.register('crossfadeSounds', _crossfadeSoundsSocket);
-  socket.register('getCrossbladeEvent', _getCrossbladeEventSocket);
-  socket.register('updateCrossbladeEventSocket', _updateCrossbladeEventSocket);
-  socket.register('updatePlaylistSocket', _crossfadePlaylistSocket);
-  socket.register('updatePlaylistSoundSocket', _crossfadePlaylistSoundSocket);
-});
-
-export async function crossfadePlaylistsSocket(...playlistIds: string[]) {
-  debug('crossfadePlaylistsSocket', playlistIds);
-  return socket?.executeForEveryone(_crossfadePlaylistsSocket, ...playlistIds);
-}
-
-function _crossfadePlaylistsSocket(...playlistIds: string[]) {
-  debug('_crossfadePlaylistsSocket', playlistIds);
-  const playlists = game.playlists?.filter((p) => playlistIds.includes(p.id));
-  if (playlists) {
-    CrossbladeController.crossfadePlaylists(...playlists);
-  }
-}
-
-export async function crossfadeSoundsSocket(playlistId: string, ...soundIds: string[]) {
-  debug('crossfadeSoundsSocket', soundIds);
-  return socket?.executeForEveryone(_crossfadeSoundsSocket, playlistId, ...soundIds);
-}
-
-function _crossfadeSoundsSocket(playlistId: string, ...soundIds: string[]) {
-  debug('_crossfadeSoundsSocket', soundIds);
-  const playlist = game.playlists?.find((p) => p.id === playlistId);
-  const sounds = playlist?.sounds.filter((s) => (s.id && soundIds.includes(s.id)) as boolean);
-  if (sounds) {
-    CrossbladeController.crossfadeSounds(...sounds);
-  }
-}
-
-export async function getCrossbladeEventSocket() {
-  debug('getCrossbladeEventSocket');
-  return socket?.executeAsGM(_getCrossbladeEventSocket);
-}
-
-function _getCrossbladeEventSocket() {
-  debug('_getCrossbladeEventSocket');
-  return getCrossbladeEvent();
-}
-
-export async function updateCrossbladeEventSocket(status: string) {
-  debug('updateCrossbladeEventSocket', status);
-  return socket?.executeForEveryone(_updateCrossbladeEventSocket, status);
-}
-
-function _updateCrossbladeEventSocket(status: string) {
-  debug('_updateCrossbladeEventSocket', status);
-  CrossbladeController.setCurrentEvent(status);
-  CrossbladeController.crossfadePlaylists();
-}
-
-export async function crossfadePlaylistSocket(status: string, ...playlists: Playlist[]) {
-  debug('crossfadePlaylistSocket', status, playlists);
-  return socket?.executeForEveryone(
-    _crossfadePlaylistSocket,
-    status,
-    playlists.map((p) => p.id),
-  );
-}
-
-function _crossfadePlaylistSocket(status: string, ...playlistIds: string[]) {
-  debug('_crossfadePlaylistSocket', status, playlistIds);
-  CrossbladeController.setCurrentEvent(status);
-  const playlists = game.playlists?.filter((p) => playlistIds.includes(p.id)) ?? [];
-  CrossbladeController.crossfadePlaylists(...playlists);
-}
-
-export async function crossfadePlaylistSoundSocket(status: string, ...sounds: PlaylistSound[]) {
-  debug('crossfadePlaylistSoundSocket', status, sounds);
-  return socket?.executeForEveryone(_crossfadePlaylistSoundSocket, status, ...sounds.map((s) => s.uuid));
-}
-
-function _crossfadePlaylistSoundSocket(status: string, ...soundUuids: string[]) {
-  debug('_crossfadePlaylistSoundSocket', status, soundUuids);
-  CrossbladeController.setCurrentEvent(status);
-
-  Promise.all(
-    soundUuids.map((uuid) => {
-      return fromUuid(uuid) as Promise<PlaylistSound>;
-    }),
-  ).then((sounds) => {
-    CrossbladeController.crossfadeSounds(...sounds);
-  });
+export async function setCustomEvent(event?: string) {
+  return await game.settings.set(MODULE_ID, 'customEvent', event?.toUpperCase() ?? '');
 }
 
 export class CrossbladeController {
-  protected static _currentStatus = 'DEFAULT';
-
-  static getCurrentEvent(): string {
-    return this._currentStatus;
+  static get event(): string {
+    return _determineCrossbladeEvent(); //this._event;
   }
 
-  static setCurrentEvent(status: string) {
-    this._currentStatus = status;
+  static get customEvent() {
+    const customEventValue = getCustomEvent();
+    return customEventValue ? `CUSTOM: ${customEventValue}` : undefined;
   }
 
   static getCrossbladePlaylists(...playlists: Playlist[]) {

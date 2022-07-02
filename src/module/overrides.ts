@@ -86,7 +86,6 @@ export namespace PlaylistSoundOverrides {
           loop: this.data.repeat,
           fade: fade,
         };
-        // TODO: Should we really be processing the base sound as part of this loop?
         if (this.data.pausedTime && baseSound === layerSound) {
           playback.offset = this.data.pausedTime;
         } else if (baseSound !== layerSound) {
@@ -98,16 +97,13 @@ export namespace PlaylistSoundOverrides {
           await layerSound.loading;
           // Load and autoplay layer sound, play directly if already loaded and not playing, or just fade to the proper volume.
           if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
-          // Keep layers synced.
-          // TODO: In the event that a currently playing layer is out of sync, it will immediately mute instead of fading out here.
-          else if (!layerSound.playing || layerSound.currentTime !== baseSound.currentTime) layerSound.play(playback);
+          // Keep layers playing together.
+          else if (!layerSound.playing) layerSound.play(playback);
           else !layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
         };
 
-        if (layerSound !== baseSound) {
-          await baseSound.loading;
-          loadOrPlay();
-        } else loadOrPlay();
+        if (layerSound !== baseSound && !baseSound.playing) baseSound.on('start', loadOrPlay, { once: true });
+        else loadOrPlay();
       }
     }
   }

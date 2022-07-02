@@ -74,7 +74,7 @@ export default class CrossbladeSoundConfig<
       //const layerIndex =
       const newContent = await renderTemplate('modules/crossblade/templates/crossblade-sound-event-subcontrol.hbs', {
         options: event.options,
-        isCustom: event.isCustom,
+        manualEntry: event.manualEntry,
         layerIndex: layerIndex,
         eventIndex: eventIndex,
       });

@@ -7,13 +7,10 @@ import {
   log,
   debug,
   inArray,
-  getCrossbladeEvent,
-  updateCrossbladeEventSocket,
-  getCrossbladeEventSocket,
   CrossbladeController,
-  crossfadePlaylistsSocket,
-  isLeadGM,
   getUniqueCrossbladeSounds,
+  setCustomEvent,
+  getCustomEvent,
 } from './utils';
 import { DevModeApi, CrossbladePlaylistSound, CrossbladeModule } from './types';
 import { PlaylistDirectoryOverrides, PlaylistOverrides, PlaylistSoundOverrides } from './overrides';
@@ -71,37 +68,41 @@ Hooks.once('devModeReady', (api: DevModeApi) => {
 });
 
 Hooks.on('updateCombat', async () => {
-  await updateCrossbladeEventSocket(getCrossbladeEvent());
-});
-
-Hooks.on('deleteCombat', async () => {
-  await updateCrossbladeEventSocket(getCrossbladeEvent());
-});
-
-Hooks.on('pauseGame', async () => {
-  if (isLeadGM()) {
-    await updateCrossbladeEventSocket(getCrossbladeEvent());
+  if (game.settings.get(MODULE_ID, 'combatEvents') === true) {
+    CrossbladeController.crossfadePlaylists();
   }
 });
 
+Hooks.on('deleteCombat', async () => {
+  if (game.settings.get(MODULE_ID, 'combatEvents') === true) {
+    CrossbladeController.crossfadePlaylists();
+  }
+});
+
+Hooks.on('pauseGame', async () => {
+  CrossbladeController.crossfadePlaylists();
+});
+
 Hooks.on('globalPlaylistVolumeChanged', async () => {
-  await crossfadePlaylistsSocket();
+  CrossbladeController.crossfadePlaylists();
 });
 
 Hooks.once('ready', async () => {
-  CrossbladeController.setCurrentEvent((await getCrossbladeEventSocket()) || 'DEFAULT');
   CrossbladeController.crossfadePlaylists();
 
-  // Determine whether a module migration is required and feasible
   if (!game.user?.isGM) return;
   const crossbladeModule = game.modules.get(MODULE_ID) as CrossbladeModule | undefined;
-
   if (!crossbladeModule) return;
+  crossbladeModule.api = {
+    getCustomEvent: getCustomEvent,
+    setCustomEvent: setCustomEvent,
+  };
   crossbladeModule.migrations = {
     migrateWorld: migrateWorld,
     migrateCompendium: migrateCompendium,
     migratePlaylistSoundData: migratePlaylistSoundData,
   };
+  // Determine whether a module migration is required
   const latestMigrationVersion = game.settings.get(MODULE_ID, 'moduleMigrationVersion') as string | undefined;
   const NEEDS_MIGRATION_VERSION = '1.0.7';
   const totalDocuments = game.playlists?.size ?? 0;
@@ -140,7 +141,7 @@ Hooks.on(
   },
 );
 
-// Header button bars for sound config
+// Header bar buttons for sound config
 Hooks.on(
   'getPlaylistSoundConfigHeaderButtons',
   (soundConfig: PlaylistSoundConfig, buttons: Application.HeaderButton[]) => {
@@ -158,22 +159,35 @@ Hooks.on(
   },
 );
 
-// Header button bars for sound config
+// Scene control buttons
 Hooks.on('getSceneControlButtons', (buttons) => {
   if (!canvas) return;
   const group = buttons.find((b) => b.name === 'sounds') as SceneControl;
-  group.tools.push({
-    icon: 'fas fa-pause',
-    name: 'CROSSBLADE.Settings.Combat.Pause.Name',
-    title: 'CROSSBLADE.Settings.Combat.Pause.Hint',
-    onClick: () => {
-      game.settings.set(MODULE_ID, 'combatPause', !(game.settings.get(MODULE_ID, 'combatPause') ?? false));
+  group.tools.push(
+    {
+      icon: 'fas fa-pause',
+      name: 'CROSSBLADE.Settings.Events.CombatPauseEvent.Name',
+      title: 'CROSSBLADE.Settings.Events.CombatPauseEvent.Hint',
+      onClick: () => {
+        game.settings.set(MODULE_ID, 'combatPauseEvent', !(game.settings.get(MODULE_ID, 'combatPauseEvent') ?? false));
+      },
+      active: game.settings.get(MODULE_ID, 'combatPauseEvent') === true,
+      toggle: true,
     },
-    active: game.settings.get(MODULE_ID, 'combatPause') === true,
-    toggle: true,
-  });
+    {
+      icon: 'crossblade-font-icon',
+      name: 'CROSSBLADE.Settings.Events.CombatEvents.Name',
+      title: 'CROSSBLADE.Settings.Events.CombatEvents.Hint',
+      onClick: () => {
+        game.settings.set(MODULE_ID, 'combatEvents', !(game.settings.get(MODULE_ID, 'combatEvents') ?? false));
+      },
+      active: game.settings.get(MODULE_ID, 'combatEvents') === true,
+      toggle: true,
+    },
+  );
 });
 
+// Right sidebar playlist
 Hooks.on('renderPlaylistDirectory', (app: Application, html: JQuery) => {
   const sounds = html.find('.directory-list .sound');
   sounds.each((index, sound) => {
