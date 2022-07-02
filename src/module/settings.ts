@@ -1,4 +1,4 @@
-import { CrossbladeController, MODULE_ID } from './utils';
+import { CrossbladeController, log, MODULE_ID } from './utils';
 
 export function registerSettings(): void {
   // Register any custom module settings
@@ -32,11 +32,8 @@ export function registerSettings(): void {
     type: String,
     onChange: async (value) => {
       if (game.user?.isGM) {
-        if (value)
-          ui.notifications.info(
-            'Crossblade: ' + game.i18n.format('CROSSBLADE.Settings.Events.Custom.Set', { value: value }),
-          );
-        else ui.notifications.info('Crossblade: ' + game.i18n.format('CROSSBLADE.Settings.Events.Custom.Cleared'));
+        if (value) log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.Set', { value: value }));
+        else log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.Cleared'));
       }
       CrossbladeController.crossfadePlaylists();
     },
@@ -51,10 +48,7 @@ export function registerSettings(): void {
     default: true,
     onChange: (value) => {
       if (game.user?.isGM) {
-        ui.notifications.info(
-          'Crossblade: ' +
-            game.i18n.localize(`CROSSBLADE.Settings.Events.CombatEvents.${value ? 'Enabled' : 'Disabled'}`),
-        );
+        log(`CROSSBLADE.Settings.Events.CombatEvents.${value ? 'Enabled' : 'Disabled'}`);
       }
       CrossbladeController.crossfadePlaylists();
     },
@@ -68,10 +62,7 @@ export function registerSettings(): void {
     default: true,
     onChange: (value) => {
       if (game.user?.isGM) {
-        ui.notifications.info(
-          'Crossblade: ' +
-            game.i18n.localize(`CROSSBLADE.Settings.Events.CombatPauseEvent.${value ? 'Enabled' : 'Disabled'}`),
-        );
+        log(`CROSSBLADE.Settings.Events.CombatPauseEvent.${value ? 'Enabled' : 'Disabled'}`);
       }
       CrossbladeController.crossfadePlaylists();
     },
