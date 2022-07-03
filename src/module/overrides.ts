@@ -98,7 +98,7 @@ export namespace PlaylistSoundOverrides {
           // Load and autoplay layer sound, play directly if already loaded and not playing, or just fade to the proper volume.
           if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
           // Keep layers playing together.
-          else if (!layerSound.playing) layerSound.play(playback);
+          else if (!layerSound.playing || layerSound.loop != this.data.repeat) layerSound.play(playback);
           else !layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
         };
 
