@@ -154,6 +154,7 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
         // Use the base sound if it matches the layer, or create a new one.
         const layerSound = getCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
+          debug('events', sl.events);
           crossbladeSounds.set(
             layerSound,
             sl.events
@@ -207,12 +208,12 @@ export function getCustomEvent() {
 }
 
 export async function setCustomEvent(event?: string) {
-  return await game.settings.set(MODULE_ID, 'customEvent', event?.toUpperCase() ?? '');
+  return await game.settings.set(MODULE_ID, 'customEvent', event?.trim() ?? '');
 }
 
 export class CrossbladeController {
   static get event(): string {
-    return _determineCrossbladeEvent(); //this._event;
+    return _determineCrossbladeEvent();
   }
 
   static get customEvent() {

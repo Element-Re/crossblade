@@ -28,14 +28,29 @@ export function registerSettings(): void {
     name: 'CROSSBLADE.Settings.Events.Custom.Name',
     hint: 'CROSSBLADE.Settings.Events.Custom.Hint',
     scope: 'world',
-    config: false,
+    config: true,
     type: String,
     onChange: async (value) => {
       if (game.user?.isGM) {
-        if (value) log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.Set', { value: value }));
+        if (value) log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.SetTo', { value: value }));
         else log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.Cleared'));
       }
+      ui.playlists.render();
       CrossbladeController.crossfadePlaylists();
+    },
+  });
+
+  game.settings.register(MODULE_ID, 'playlistDirectoryCustomEvent', {
+    name: 'CROSSBLADE.Settings.UI.PlaylistDirectoryCustomEvent.Name',
+    hint: 'CROSSBLADE.Settings.UI.PlaylistDirectoryCustomEvent.Hint',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: async () => {
+      if (game.user?.isGM) {
+        ui.playlists.render();
+      }
     },
   });
 

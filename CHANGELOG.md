@@ -1,17 +1,11 @@
-## Known Issues
-- Changing the 'Loop' setting of a currently playing PlaylistSound will not be reflected until the next time the sound is started.
-
-## Changelog
-
 ### 1.1.0
 - [Changed] Much of the module has undergone a major rewrite
-- [New] The sound layer configuration dialog has a new coat of paint, to more easily differentiate between layers and save some space with a dynamic list of event triggers instead of a row of checkboxes for each possible event.
-
-!['New Layer Config Dialog'](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/changelog/1.1.0_new-layer-config-dialog.webp?raw=true "New Layer Config Dialog")
-
+- [New] Crossblade now supports configuring custom events for layers than can be manually triggered via a macro or an [input directly from the playlist sidebar](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/changelog/1.1.0_custom-events.webp?raw=true). Custom events take priority over standard events
+- [New] Added new settings to allow users to customize how they want to use Crossblade, optionally favoring custom events, standard events, or a mixed approach
+- [New] The sound layer configuration dialog [has a new coat of paint](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/changelog/1.1.0_new-layer-config-dialog.webp?raw=true), to more easily differentiate between layers and save some space with a dynamic list of event triggers instead of a row of checkboxes for each possible event, as well as allow input of custom events
 - [Changed] Crossblade event data has changed under the hood. The module should automatically migrate all Crossblade event data the first time the world is loaded after updating.
-- [Fixed] Resolved issue that caused clients to crash when bulk operations were performed on a large number of Playlist Sounds
-- [Fixed] Resolved at least one more cause of sound layers going out of sync.
+- [Fixed] Resolved issue that caused the Web Audio api (and potentially the Foundry client) to crash when bulk operations were performed on a large number of Playlist Sounds
+- [Fixed] Resolved several more causes of sound layers going out of sync
 
 ### 1.0.7
 - [Fixed] Resolved error preventing rendering the sound layer configuration dialog on systems other than 5e
@@ -24,9 +18,7 @@
 
 - [Changed] Refactor of layer generation logic to reuse the main sound object if the same audio source is specified in a sound layer
 - [Fixed] Resolved a number of cases that could cause sound layers to go out of sync from the base sound
-- [Added] Crossblade-enabled sounds will now display a "⚔" icon next to their name in the playlist directory, so that they can be identified at a glance
-
-!['Playlist Directory Icons'](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/changelog/playlist-directory-icons.webp?raw=true "Playlist Directory Icons")
+- [Added] Crossblade-enabled sounds will now [display a "⚔" icon](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/changelog/playlist-directory-icons.webp?raw=true) next to their name in the playlist directory, so that they can be identified at a glance
 
 ### 1.0.4
 

@@ -154,10 +154,8 @@ export default class CrossbladeSoundConfig<
     soundLayersArray.forEach((soundLayer) => {
       const events = soundLayer.events ?? {};
       const eventsArray = Array.from(Object.values(events)).map((event) => {
-        if (Array.isArray(event)) {
-          // Only keep up to first two items
-          return event.slice(0, 2);
-        } else return event;
+        // Ensure an array of trimmed strings, no more than 2 in length.
+        return (Array.isArray(event) ? event.slice(0, 2) : [event]).map((part) => part.toString().trim());
       });
       soundLayer.events = eventsArray;
     });

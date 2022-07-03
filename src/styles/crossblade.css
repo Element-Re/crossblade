@@ -57,6 +57,16 @@
   margin-right: 3px;
 }
 
+.directory .directory-header .header-crossblade-custom-event > * {
+  flex: 0 0 24px;
+}
+
+.directory .directory-header .header-crossblade-custom-event input[name='customEvent'] {
+  flex: 1;
+  margin: 0 3px;
+  background: rgba(255, 255, 245, 0.8);
+}
+
 .directory-list .sound .sound-name i[class^='crossblade-font-icon'] {
   margin-left: 3px;
   cursor: help;
