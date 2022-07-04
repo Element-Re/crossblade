@@ -1,6 +1,8 @@
 # ⚔ Crossblade - Adaptive Music Crossfader
 Crossblade is an audio module that enables the GM to define playlist sounds that crossfade in and out between synchronous multi-layered sound files based on triggers. The result is an [adaptive music](https://en.wikipedia.org/wiki/Adaptive_music) soundtrack that responds dynamically to the game's state, such as the ebb and flow of a combat encounter.
 
+## Crossblade in action (enable sound)
+
 https://user-images.githubusercontent.com/86752832/177115407-df396b7e-27e7-46ab-8ec5-6d4e9f54cd90.mp4
 
 ## What does this module do?
