@@ -18,7 +18,14 @@
   "scripts": [],
   "esmodules": ["module/crossblade.js"],
   "styles": ["styles/crossblade.css"],
-  "packs": [],
+  "packs": [
+    {
+      "name": "crossblade-macros",
+      "label": "Crossblade Macros",
+      "path": "./packs/crossblade-macros.db",
+      "entity": "Macro"
+    }
+  ],
   "dependencies": [
     {
       "name": "lib-wrapper"

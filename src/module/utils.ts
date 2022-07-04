@@ -204,7 +204,7 @@ export function debug(...args: unknown[]) {
 }
 
 export function getCustomEvent() {
-  return (game.settings.get(MODULE_ID, 'customEvent') as string | undefined)?.toUpperCase();
+  return game.settings.get(MODULE_ID, 'customEvent') as string | undefined;
 }
 
 export async function setCustomEvent(event?: string) {
@@ -218,7 +218,7 @@ export class CrossbladeController {
 
   static get customEvent() {
     const customEventValue = getCustomEvent();
-    return customEventValue ? `CUSTOM: ${customEventValue}` : undefined;
+    return customEventValue ? `CUSTOM: ${customEventValue.toUpperCase()}` : undefined;
   }
 
   static getCrossbladePlaylists(...playlists: Playlist[]) {

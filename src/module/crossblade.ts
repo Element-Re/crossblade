@@ -221,13 +221,30 @@ Hooks.on('renderPlaylistDirectory', async (app: Application, html: JQuery) => {
       $customEventInput.on('keypress', (event) => {
         if (event.key === 'Enter') module.api.setCustomEvent($customEventInput.val() as string | undefined);
       });
-      $customEventInput.on('focus', () => {
-        $customEventInput.trigger('select');
+      $customEventInput.on('focusin', () => $customEventInput.trigger('select'));
+      $customEventInput.on('focusout', () => {
+        if ($customEventInput.val() !== $customEventInput.attr('value')) {
+          // Wait a moment to see if the user updates by clicking the set button
+          setTimeout(() => {
+            if ($.contains(document.documentElement, $customEventInput.get(0) as HTMLElement)) {
+              if ($customEventInput.val() !== $customEventInput.attr('value')) {
+                $customEventInput.addClass('warn');
+                if (game.settings.get(MODULE_ID, 'playlistDirectoryCustomEventWarning')) {
+                  ui.notifications.warn('CROSSBLADE.Notifications.UI.PlaylistDirectoryCustomEventWarning', {
+                    localize: true,
+                  });
+                }
+              } else {
+                $customEventInput.removeClass('warn');
+              }
+            }
+          }, 200);
+        }
       });
+      const $setCustomEventAnchor = $directoryHeader.find('a.set-custom-event');
+      $setCustomEventAnchor.on('click', () => module.api.setCustomEvent($customEventInput.val() as string | undefined));
       const $clearCustomEventAnchor = $directoryHeader.find('a.clear-custom-event');
-      $clearCustomEventAnchor.on('click', () => {
-        module.api.setCustomEvent();
-      });
+      $clearCustomEventAnchor.on('click', () => module.api.setCustomEvent());
     }
   }
 });

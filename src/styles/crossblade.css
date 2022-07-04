@@ -46,6 +46,11 @@
 
 .crossblade-font-icon {
   font-weight: 900;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
 }
 
 .crossblade-font-icon::before {
@@ -53,7 +58,11 @@
   content: '⚔';
 }
 
-.window-app .window-header i[class^='crossblade-font-icon'] {
+.directory .directory-header i.crossblade-font-icon {
+  font-size: 20px;
+}
+
+.window-app .window-header i.crossblade-font-icon {
   margin-right: 3px;
 }
 
@@ -67,7 +76,16 @@
   background: rgba(255, 255, 245, 0.8);
 }
 
-.directory-list .sound .sound-name i[class^='crossblade-font-icon'] {
+.directory .directory-header .header-crossblade-custom-event.active i.crossblade-font-icon {
+  color: rgba(160, 255, 20);
+  text-shadow: 0 0 8px rgba(160, 255, 20);
+}
+
+.directory .directory-header .header-crossblade-custom-event input[name='customEvent'].warn:not(:focus) {
+  background: rgba(255, 240, 0, 0.8);
+}
+
+.directory-list .sound .sound-name i.crossblade-font-icon {
   margin-left: 3px;
   cursor: help;
 }
@@ -75,12 +93,6 @@
 #context-menu li.context-item > i.crossblade-font-icon {
   margin-right: 5px;
   -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  display: inline-block;
-  font-style: normal;
-  font-variant: normal;
-  text-rendering: auto;
-  line-height: 1;
 }
 
 .crossblade-events label.form-check-label {

@@ -1,5 +1,6 @@
-<div class="header-crossblade-custom-event flexrow">
+<div class="header-crossblade-custom-event {{#if value}}active {{/if}}flexrow">
   <i class="crossblade-font-icon"></i>
-  <input type="text" name="customEvent" value="{{ value }}" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Name' }}" placeholder="{{ localize 'CROSSBLADE.Settings.Events.Custom.Name' }}" autocomplete="off">
+  <input type="text" name="customEvent" value="{{ value }}" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Hint' }}" placeholder="{{ localize 'CROSSBLADE.Settings.Events.Custom.Name' }}" autocomplete="off">
+  <a class="set-custom-event" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Set' }}"><i class="fas fa-check fa-fw"></i></a>
   <a class="clear-custom-event" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Clear' }}"><i class="fas fa-times fa-fw"></i></a>
 </div>

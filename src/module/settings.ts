@@ -28,7 +28,7 @@ export function registerSettings(): void {
     name: 'CROSSBLADE.Settings.Events.Custom.Name',
     hint: 'CROSSBLADE.Settings.Events.Custom.Hint',
     scope: 'world',
-    config: true,
+    config: false,
     type: String,
     onChange: async (value) => {
       if (game.user?.isGM) {
@@ -52,6 +52,15 @@ export function registerSettings(): void {
         ui.playlists.render();
       }
     },
+  });
+
+  game.settings.register(MODULE_ID, 'playlistDirectoryCustomEventWarning', {
+    name: 'CROSSBLADE.Settings.UI.PlaylistDirectoryCustomEventWarning.Name',
+    hint: 'CROSSBLADE.Settings.UI.PlaylistDirectoryCustomEventWarning.Hint',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
   });
 
   game.settings.register(MODULE_ID, 'combatEvents', {
