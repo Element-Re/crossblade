@@ -1,6 +1,6 @@
 import { ModuleData } from '@league-of-foundry-developers/foundry-vtt-types/src/foundry/common/packages.mjs';
 import { migratePlaylistSoundData, migrateCompendium, migrateWorld } from './migrations';
-import { getCustomEvent, setCustomEvent } from './utils';
+import { getPlayingCustomEvents, getCustomEvent, setCustomEvent, getAllCustomEvents } from './utils';
 
 export interface CrossbladeModule extends Game.ModuleData<ModuleData> {
   migrations: {
@@ -11,6 +11,8 @@ export interface CrossbladeModule extends Game.ModuleData<ModuleData> {
   api: {
     getCustomEvent: typeof getCustomEvent;
     setCustomEvent: typeof setCustomEvent;
+    getPlayingCustomEvents: typeof getPlayingCustomEvents;
+    getAllCustomEvents: typeof getAllCustomEvents;
   };
 }
 
@@ -74,9 +76,9 @@ export interface CrossbladeEvent {
 
 export type CrossbladeEventKey = 'DEFAULT' | 'COMBATANT' | /* 'COMBATANT_TAG' | */ 'GAME' | 'CUSTOM';
 
-export interface CrossbladeSoundLayer extends Record<string, string | string[]> {
+export interface CrossbladeSoundLayer extends Record<string, string | string[][]> {
   src: string;
-  events: string[];
+  events: string[][];
 }
 
 export interface CrossbladeFlags {

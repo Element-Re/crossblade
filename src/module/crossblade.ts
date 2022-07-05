@@ -6,11 +6,14 @@ import {
   MODULE_ID,
   log,
   debug,
-  inArray,
+  inHelper,
   CrossbladeController,
   getUniqueCrossbladeSounds,
   setCustomEvent,
   getCustomEvent,
+  formatCustomEvent,
+  getPlayingCustomEvents,
+  getAllCustomEvents,
 } from './utils';
 import { DevModeApi, CrossbladePlaylistSound, CrossbladeModule } from './types';
 import { PlaylistDirectoryOverrides, PlaylistOverrides, PlaylistSoundOverrides } from './overrides';
@@ -58,7 +61,7 @@ Hooks.once('init', async () => {
     'WRAPPER',
   );
 
-  Handlebars.registerHelper('inArray', inArray);
+  Handlebars.registerHelper('crossblade_in', inHelper);
 });
 
 // Hooks
@@ -96,6 +99,8 @@ Hooks.once('ready', async () => {
   crossbladeModule.api = {
     getCustomEvent: getCustomEvent,
     setCustomEvent: setCustomEvent,
+    getPlayingCustomEvents: getPlayingCustomEvents,
+    getAllCustomEvents: getAllCustomEvents,
   };
   crossbladeModule.migrations = {
     migrateWorld: migrateWorld,
@@ -163,6 +168,7 @@ Hooks.on(
 Hooks.on('getSceneControlButtons', (buttons) => {
   if (!canvas) return;
   const group = buttons.find((b) => b.name === 'sounds') as SceneControl;
+
   group.tools.push(
     {
       icon: 'fas fa-pause',
@@ -207,44 +213,79 @@ Hooks.on('renderPlaylistDirectory', async (app: Application, html: JQuery) => {
         }
       }
     });
-    if (game.settings.get(MODULE_ID, 'playlistDirectoryCustomEvent') === true) {
+    const directoryCustomEventSetting = game.settings.get(MODULE_ID, 'playlistDirectoryCustomEvent') as string;
+    if (['DROPDOWN', 'INPUT'].includes(directoryCustomEventSetting)) {
       const $directoryHeader = html.find('header.directory-header');
+      const customEvent = getCustomEvent();
+      const formattedCustomEvent = formatCustomEvent(customEvent);
+      const status =
+        formattedCustomEvent && game.playlists?.playing.length
+          ? game.playlists?.playing.some((playlist) =>
+              playlist.sounds.some(
+                (pls) =>
+                  pls.playing &&
+                  [...((pls as CrossbladePlaylistSound).cbSoundLayers?.values() ?? [])]
+                    .flat()
+                    .some((event) => event === formattedCustomEvent),
+              ),
+            )
+            ? 'active'
+            : 'inactive'
+          : undefined;
+      let options: string[] | undefined;
+      if (directoryCustomEventSetting === 'DROPDOWN') {
+        const allCustomEvents = getAllCustomEvents({ sort: true });
+        options = ['', ...(customEvent && !allCustomEvents.has(customEvent) ? [customEvent] : []), ...allCustomEvents];
+      }
       const customEventRow = await renderTemplate(
         'modules/crossblade/templates/crossblade-custom-event-directory-header.hbs',
         {
-          value: game.settings.get(MODULE_ID, 'customEvent'),
+          value: customEvent,
+          status: status,
+          options: options,
+          playing: options ? getPlayingCustomEvents() : undefined,
         },
       );
       $directoryHeader.append(customEventRow);
       const module = game.modules.get(MODULE_ID) as CrossbladeModule;
-      const $customEventInput = $directoryHeader.find('input[name=customEvent]');
-      $customEventInput.on('keypress', (event) => {
-        if (event.key === 'Enter') module.api.setCustomEvent($customEventInput.val() as string | undefined);
-      });
-      $customEventInput.on('focusin', () => $customEventInput.trigger('select'));
-      $customEventInput.on('focusout', () => {
-        if ($customEventInput.val() !== $customEventInput.attr('value')) {
-          // Wait a moment to see if the user updates by clicking the set button
-          setTimeout(() => {
-            if ($.contains(document.documentElement, $customEventInput.get(0) as HTMLElement)) {
-              if ($customEventInput.val() !== $customEventInput.attr('value')) {
-                $customEventInput.addClass('warn');
-                if (game.settings.get(MODULE_ID, 'playlistDirectoryCustomEventWarning')) {
-                  ui.notifications.warn('CROSSBLADE.Notifications.UI.PlaylistDirectoryCustomEventWarning', {
-                    localize: true,
-                  });
+
+      if (directoryCustomEventSetting === 'DROPDOWN') {
+        $directoryHeader.find('select[name=customEvent]').on('change', (event) => {
+          module.api.setCustomEvent($(event.target).val() as string | undefined);
+        });
+      } else if (directoryCustomEventSetting === 'INPUT') {
+        const $customEventInput = $directoryHeader.find('input[name=customEvent]');
+        // Input handling
+        $customEventInput.on('keypress', (event) => {
+          if (event.key === 'Enter') module.api.setCustomEvent($customEventInput.val() as string | undefined);
+        });
+        $customEventInput.on('focusin', () => $customEventInput.trigger('select'));
+        $customEventInput.on('focusout', () => {
+          if ($customEventInput.val() !== $customEventInput.attr('value')) {
+            // Wait a moment to see if the user updates by clicking the set button
+            setTimeout(() => {
+              if ($.contains(document.documentElement, $customEventInput.get(0) as HTMLElement)) {
+                if ($customEventInput.val() !== $customEventInput.attr('value')) {
+                  $customEventInput.addClass('warn');
+                  if (game.settings.get(MODULE_ID, 'playlistDirectoryCustomEventWarning')) {
+                    ui.notifications.warn('CROSSBLADE.Notifications.UI.PlaylistDirectoryCustomEventWarning', {
+                      localize: true,
+                    });
+                  }
+                } else {
+                  $customEventInput.removeClass('warn');
                 }
-              } else {
-                $customEventInput.removeClass('warn');
               }
-            }
-          }, 200);
-        }
-      });
-      const $setCustomEventAnchor = $directoryHeader.find('a.set-custom-event');
-      $setCustomEventAnchor.on('click', () => module.api.setCustomEvent($customEventInput.val() as string | undefined));
-      const $clearCustomEventAnchor = $directoryHeader.find('a.clear-custom-event');
-      $clearCustomEventAnchor.on('click', () => module.api.setCustomEvent());
+            }, 200);
+          }
+        });
+        const $setCustomEventAnchor = $directoryHeader.find('a.set-custom-event');
+        $setCustomEventAnchor.on('click', () =>
+          module.api.setCustomEvent($customEventInput.val() as string | undefined),
+        );
+        const $clearCustomEventAnchor = $directoryHeader.find('a.clear-custom-event');
+        $clearCustomEventAnchor.on('click', () => module.api.setCustomEvent());
+      }
     }
   }
 });

@@ -40,13 +40,18 @@ export function registerSettings(): void {
     },
   });
 
-  game.settings.register(MODULE_ID, 'playlistDirectoryCustomEvent', {
+  game.settings.register<string, string, string>(MODULE_ID, 'playlistDirectoryCustomEvent', {
     name: 'CROSSBLADE.Settings.UI.PlaylistDirectoryCustomEvent.Name',
     hint: 'CROSSBLADE.Settings.UI.PlaylistDirectoryCustomEvent.Hint',
     scope: 'world',
     config: true,
-    type: Boolean,
-    default: true,
+    type: String,
+    choices: {
+      DROPDOWN: 'Dropdown',
+      INPUT: 'Input',
+      HIDE: 'Hide',
+    },
+    default: 'DROPDOWN',
     onChange: async () => {
       if (game.user?.isGM) {
         ui.playlists.render();

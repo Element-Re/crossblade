@@ -1,4 +1,11 @@
-import { CrossbladeEvent, CrossbladeEventKey, CrossbladePlaylistSound, DevModeModuleData, SoundLayer } from './types';
+import {
+  CrossbladeEvent,
+  CrossbladeEventKey,
+  CrossbladeFlags,
+  CrossbladePlaylistSound,
+  DevModeModuleData,
+  SoundLayer,
+} from './types';
 
 export const CROSSBLADE_EVENTS: Record<CrossbladeEventKey, CrossbladeEvent> = {
   DEFAULT: {
@@ -36,8 +43,13 @@ export const MODULE_ID = 'crossblade';
 export const MODULE_NAME = 'Crossblade';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function inArray(array: any[] | undefined | null, toCheck: any | undefined | null) {
-  return toCheck && array?.includes(toCheck);
+export function inHelper(iterable: Iterable<any> | undefined | null, toCheck: any | undefined | null) {
+  if (iterable) {
+    for (const item of iterable) {
+      if (item === toCheck) return true;
+    }
+  }
+  return false;
 }
 
 export function getCrossbladeSound(src: string, basedOn: PlaylistSound) {
@@ -211,14 +223,50 @@ export async function setCustomEvent(event?: string) {
   return await game.settings.set(MODULE_ID, 'customEvent', event?.trim() ?? '');
 }
 
+export function formatCustomEvent(customEvent: string | undefined) {
+  return customEvent ? `CUSTOM: ${customEvent.toUpperCase()}` : undefined;
+}
+
+export function getPlayingCustomEvents(options = { sort: false }) {
+  const events = game.playlists?.playing
+    .map((playlist) =>
+      playlist.sounds
+        .filter((pls) => pls.playing)
+        .map((pls: CrossbladePlaylistSound) =>
+          ((pls.data.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
+            .map((layer) => layer.events)
+            .flat()
+            .filter((event) => event[0] === 'CUSTOM')
+            .map((event) => event[1]),
+        ),
+    )
+    .deepFlatten();
+
+  return new Set(options.sort ? events?.sort() : events);
+}
+
+export function getAllCustomEvents(options = { sort: false }) {
+  const events = game.playlists?.contents
+    .map((playlist) =>
+      playlist.sounds.map((pls: CrossbladePlaylistSound) =>
+        ((pls.data.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
+          ?.map((layer) => layer.events)
+          .flat()
+          .filter((event) => event[0] === 'CUSTOM')
+          .map((event) => event[1]),
+      ),
+    )
+    .deepFlatten();
+  return new Set(options.sort ? events?.sort() : events);
+}
+
 export class CrossbladeController {
   static get event(): string {
     return _determineCrossbladeEvent();
   }
 
   static get customEvent() {
-    const customEventValue = getCustomEvent();
-    return customEventValue ? `CUSTOM: ${customEventValue.toUpperCase()}` : undefined;
+    return formatCustomEvent(getCustomEvent());
   }
 
   static getCrossbladePlaylists(...playlists: Playlist[]) {

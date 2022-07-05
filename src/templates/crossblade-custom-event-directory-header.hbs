@@ -1,6 +1,14 @@
-<div class="header-crossblade-custom-event {{#if value}}active {{/if}}flexrow">
-  <i class="crossblade-font-icon"></i>
-  <input type="text" name="customEvent" value="{{ value }}" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Hint' }}" placeholder="{{ localize 'CROSSBLADE.Settings.Events.Custom.Name' }}" autocomplete="off">
+<div class="header-crossblade-custom-event {{#if status}}{{status}} {{/if}}flexrow">
+  <i class="crossblade-font-icon"{{#if status}}title="{{#if (eq status 'active')}}{{ localize 'CROSSBLADE.Events.Custom.Active' }}{{else}}{{ localize 'CROSSBLADE.Events.Custom.Inactive' }}{{/if}}" {{/if}}></i>
+  {{#if options}}
+  <select name="customEvent" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Name' }}">
+    {{#each options}}
+      <option value="{{this}}" {{#if (eq this ../value)}}selected{{/if}}>{{this}} {{#if (crossblade_in ../playing this)}}🔊{{/if}}</option>
+    {{/each}}
+  </select>
+  {{else}}
+  <input type="text" name="customEvent" value="{{ value }}" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Name' }}" placeholder="{{ localize 'CROSSBLADE.Settings.Events.Custom.Name' }}" autocomplete="off">
   <a class="set-custom-event" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Set' }}"><i class="fas fa-check fa-fw"></i></a>
   <a class="clear-custom-event" title="{{ localize 'CROSSBLADE.Settings.Events.Custom.Clear' }}"><i class="fas fa-times fa-fw"></i></a>
+  {{/if}}
 </div>

@@ -70,7 +70,8 @@
   flex: 0 0 24px;
 }
 
-.directory .directory-header .header-crossblade-custom-event input[name='customEvent'] {
+.directory .directory-header .header-crossblade-custom-event input[name='customEvent'],
+.directory .directory-header .header-crossblade-custom-event select[name='customEvent'] {
   flex: 1;
   margin: 0 3px;
   background: rgba(255, 255, 245, 0.8);
@@ -79,6 +80,11 @@
 .directory .directory-header .header-crossblade-custom-event.active i.crossblade-font-icon {
   color: rgba(160, 255, 20);
   text-shadow: 0 0 8px rgba(160, 255, 20);
+}
+
+.directory .directory-header .header-crossblade-custom-event.inactive i.crossblade-font-icon {
+  color: rgb(255, 20, 20);
+  text-shadow: 0 0 8px rgb(255, 20, 20);
 }
 
 .directory .directory-header .header-crossblade-custom-event input[name='customEvent'].warn:not(:focus) {
