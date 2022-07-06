@@ -3,16 +3,16 @@ Crossblade is an audio module that enables the GM to define playlist sounds that
 
 ## Crossblade in action (enable sound)
 
-https://user-images.githubusercontent.com/86752832/177430418-d5d30c67-58af-4e51-a5e3-259c2b706be0.mp4
+https://user-images.githubusercontent.com/86752832/177466983-44460e56-9c14-4840-8668-6d2102e5db6c.mp4
 
 ## What does this module do?
 With Crossblade, you can setup playlist sounds that employ techniques sometimes used in video game soundtracks known as [vertical re-orchestration](https://en.wikipedia.org/wiki/Adaptive_music#Horizontal_and_vertical_techniques) or [soundtrack switching](https://en.wikipedia.org/wiki/Adaptive_music#Soundtrack_switching). The basic idea is that the sound is composed of multiple layers of audio. Each layer is its own audio file, but each represents a different version or instrumental component of the same song. When a Crossblade-configured sound is playing, Crossblade will respond to events that happen in the game and automatically fade in or out each layer as configured. As layers fade in and out, the tone of the currently playing song changes, but the change happens "in place" without the song ending and is seamless compared to starting another sound entirely.
 
-![Crossblade Sound with Layers](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Sound%20Diagram.webp?raw=true "Crossblade Sound with Layers")
+![Crossblade Events and Layer Fading](https://user-images.githubusercontent.com/86752832/177472671-cfefc08b-ceb7-4f57-8332-3bfb36727499.png?raw=true "Crossblade Events and Layer Fading")
 
 A Crossblade-configured sound can be part of a larger playlist of sounds, of which any or none of the other sounds could be configured with additional sound layers. Crossblade will only attempt to crossfade currently playing sounds that are configured with additional layers—any other sound will play as normal without Crossblade interfering.
 
-![Crossblade Sound with Layers](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Playlist%20Diagram.webp?raw=true "Playlist with Mixed Sounds")
+![Playlist with Mixed Sounds](https://user-images.githubusercontent.com/86752832/177472669-9f3fbf5a-fc53-418b-85eb-740eafb3c3af.png?raw=true "Playlist with Mixed Sounds")
 
 Crossblade does not come with any audio files. You will have to provide those yourself.
 
