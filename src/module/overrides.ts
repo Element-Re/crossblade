@@ -103,10 +103,10 @@ namespace PlaylistSoundOverrides {
     wrapped: (...args: never[]) => Sound | Promise<Sound> | undefined,
   ) {
     debug('in syncWrapper', this.name);
-    if (!this.sound || this.sound.failed || !this._cbSoundLayers?.size) return wrapped();
+    if (!this.sound || this.sound.failed || !this.cbSoundLayers?.size) return wrapped();
     const baseSound = this.sound;
     // Process base sound and all layers together
-    const layerSounds = new Set([baseSound, ...(this._cbSoundLayers.keys() ?? [])]);
+    const layerSounds = new Set([baseSound, ...(this.cbSoundLayers.keys() ?? [])]);
     const fade = this.fadeDuration;
 
     if (!this.playing) {
@@ -143,7 +143,7 @@ namespace PlaylistSoundOverrides {
           if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
           // Keep layers playing together.
           else if (!layerSound.playing || layerSound.loop != this.data.repeat) layerSound.play(playback);
-          else !layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
+          else layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
         };
 
         if (layerSound !== baseSound && !baseSound.playing) baseSound.on('start', loadOrPlay, { once: true });

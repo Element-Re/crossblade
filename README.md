@@ -3,92 +3,39 @@ Crossblade is an audio module that enables the GM to define playlist sounds that
 
 ## Crossblade in action (enable sound)
 
-https://user-images.githubusercontent.com/86752832/177115407-df396b7e-27e7-46ab-8ec5-6d4e9f54cd90.mp4
+https://user-images.githubusercontent.com/86752832/177466983-44460e56-9c14-4840-8668-6d2102e5db6c.mp4
 
 ## What does this module do?
 With Crossblade, you can setup playlist sounds that employ techniques sometimes used in video game soundtracks known as [vertical re-orchestration](https://en.wikipedia.org/wiki/Adaptive_music#Horizontal_and_vertical_techniques) or [soundtrack switching](https://en.wikipedia.org/wiki/Adaptive_music#Soundtrack_switching). The basic idea is that the sound is composed of multiple layers of audio. Each layer is its own audio file, but each represents a different version or instrumental component of the same song. When a Crossblade-configured sound is playing, Crossblade will respond to events that happen in the game and automatically fade in or out each layer as configured. As layers fade in and out, the tone of the currently playing song changes, but the change happens "in place" without the song ending and is seamless compared to starting another sound entirely.
 
-![Crossblade Sound with Layers](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Sound%20Diagram.webp?raw=true "Crossblade Sound with Layers")
+![Crossblade Events and Layer Fading](https://user-images.githubusercontent.com/86752832/177472671-cfefc08b-ceb7-4f57-8332-3bfb36727499.png?raw=true "Crossblade Events and Layer Fading")
 
 A Crossblade-configured sound can be part of a larger playlist of sounds, of which any or none of the other sounds could be configured with additional sound layers. Crossblade will only attempt to crossfade currently playing sounds that are configured with additional layers—any other sound will play as normal without Crossblade interfering.
 
-![Crossblade Sound with Layers](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Playlist%20Diagram.webp?raw=true "Playlist with Mixed Sounds")
+![Playlist with Mixed Sounds](https://user-images.githubusercontent.com/86752832/177472669-9f3fbf5a-fc53-418b-85eb-740eafb3c3af.png?raw=true "Playlist with Mixed Sounds")
 
 Crossblade does not come with any audio files. You will have to provide those yourself.
 
-## Terminology
-For clarity's sake, it's best to define some terms.
-### Core Foundry Terms
-* **Playlist:** A container for a set of sounds which defines how they should be played.
-* **Playlist Sound:** A single sound entry of a playlist. You can think of this as a single "track" or "song" in a playlist, although a playlist sound does not have to be musical in nature.
-* **Audio Source:** A reference to an audio file. Each playlist sound is associated with one.
-
-### Crossblade-Specific Terms
-* **Crossblade Sound Layer:** A playlist sound can be configured with one or more of these. Each layer has both its own unique audio source as well as a number of events that can trigger it. 
-    * Note that this term has nothing to do with the [Canvas Sounds Layer](https://foundryvtt.com/article/canvas-layers/).
-* **Crossblade Event:** A trigger that can change which Crossblade sound layers are currently audible.
-
-## Usage
-The following is a detailed example of a simple use case: The GM has two audio files that represent the same song in two different tonal variations.
-* *Gathering Clouds (Precipitation)*
-    * A subdued, tactical-sounding battle track. The GM wants this to play under most circumstances. 
-* *Gathering Clouds (Storm)*
-    * A more tense, percussion-heavy battle track. The GM wants this to be played only on **Hostile** combatants' turns during combat
-
-The GM creates a "Battle" playlist and then adds a playlist sound underneath it, setting the audio source to the *Gathering Clouds (Precipitation)* file. So far this is standard Foundry configuration for a new playlist and playlist sound.
-
-![Playlist Sound Config](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Playlist%20Sound%20Config.webp?raw=true "Playlist Sound Configuration")
-
-Next the GM opens the Crossblade sound layer configuration dialog by right clicking on the playlist sound and selecting "Configure Sound Layers".
-
-![Crossblade Sound Layers Context Menu](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Context%20Menu.webp?raw=true "Crossblade Sound Layers Context Menu")
-
-The GM adds a single layer by clicking the '+' icon in the upper right of the dialog, setting the source of the new layer to the *Gathering Clouds (Storm)* file. Lastly, the GM selects the Disposition: Hostile event for the sound's event trigger.
-
-![Add Crossblade Sound Layer](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Add%20Sound%20Layer.webp?raw=true "Add Crossblade Sound Layer")
-
-![Configure Crossblade Sound Layers](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Configure%20Sound%20Layers.webp?raw=true "Configure Crossblade Sound Layers")
-
-With this, the playlist sound is fully configured. Crossblade will use the playlist sound's main audio source for all cases in which there isn't a sound layer with a better match. In this case the only additional layer is configured to play in combat when the current combatant has a "hostile" disposition.
-
-The GM starts a combat and begins playing the newly-configured playlist sound. They note that as each combatant takes a turn, Crossblade fades dynamically between the two layers based on the combatant's disposition!
-
-## More Advanced Usage
-Crossblade is not limited to playlist sounds with only two layers. A playlist sound can have multiple layers with their own triggering events, and each layer can be triggered by more than one event. If multiple layers are triggered by the same event, they will play simultaneously, effectively mixing together to a single blended sound.
-
-[Complex Sound Layers Example](https://github.com/Elemental-Re/crossblade/blob/main/project_assets/readme/Complex%20Sound%20Layers.webp?raw=true)
-
-You can include a Crossblade sound layer that references the same file as the playlist sound's main audio source. This will allow you to configure it to play during specific events as well as when there is no other applicable event.
-
-
-### Crossblade Sound Layer Configuration
-There are two ways to access the Crossblade Sound Layer Configuration dialog for a playlist sound: either from the right-click context menu for the playlist sound on the sidebar, or in the header of the playlist sound configuration dialog.
-
-### Fading Layers
-When a Crossblade event occurs, Crossblade will attempt to fade the layers of any playing Crossblade-configured sounds based on the following rules:
-* For any layers that are configured for the current event, they will fade in if they are not currently playing.
-    * If no layers are configured for the current event, instead check if any layers are configured for the Default event instead, and fade in those instead.
-        * If no layers are configured for the Default event, fade in the base sound's audio source instead.
-* For any layers that are **NOT** configured for the current event, they will fade out if they are currently playing.
-
-Crossblade uses the fade duration on the playlist or playlist sound when fading sound layers in and out. If your layer transitions are too abrupt, try setting a fade duration. Around 1000ms seems to work pretty well for most cases. 
-
-## Event Types
-* **Default:** This event will trigger if no other, better event applies.
-* **Disposition:** These will only trigger during combat, based on the disposition of the current combatant.
-* **Game Paused:** This event will trigger when the game is paused. A setting controls whether or not this event can trigger during combat. In addition to the Module Settings tab of the Configure Game Settings dialog, there is a button to toggle this setting on and off and in the Ambient Sound Controls menu on the left side of the game window.
-
-Support for more events, including non-combat and manually-triggered events, is planned for a future release.
-
-## Additional Features
-Crossblade adds a right-click context menu option to playlists to automatically preload all playlist sounds and Crossblade sound layers for that playlist for all connected clients, rather than having to preload each playlist sound one-by-one. Depending on the number of playlist sounds and layers and the clients' connections this could take quite a while.
+## Using Crossblade
+For instructions how to use Crossblade, check out [the wiki](https://github.com/Elemental-Re/crossblade/wiki).
 
 ## Considerations and Known Issues
-* A GM client is required to be connected for Crossblade to function properly.
+
+### Sound Syncing and Looping
 * For best results, Crossblade sound layer audio source files should have the same BPM and should all start at the same point in the song.
     * The playlist sound's main audio source will control when the playlist automatically proceeds to the next sound. If other Crossblade sound layers are not finished playing at this time they will fade out and stop early.
-    * If a playlist sound is set to loop, each layer will loop independently, which will cause them to go out of sync if they aren't all exactly the same length. If it's important that your sound's layers remain in sync, please ensure that all the audio sources are exactly the same length. Ensuring sound length is difficult with MP3 files; consider converting your sound's layer files to OGG or some other format if you are unable to get them to sync up.
-    * Similarly, if a playlist sound or Crossblade sound layer gets stuck and won't start playing, it could be due to an ongoing issue with core foundry that seems to mainly affect MP3 files. You can try resolving it in the moment by having the affected client refresh their browser window, but if it happens regularly, as before, you can try converting your audio files to another format like OGG.
-* If for some reason a Crossblade sound layer continues to play when the base sound stops, or otherwise goes out of sync unexpectedly, refreshing the affected client should at least temporarily resolve the issue. If this happens regularly to you, please [log an issue](https://github.com/Elemental-Re/crossblade/issues) with as much info as possible to help me track down the cause.
+    * If a playlist sound is set to loop, each layer will loop independently, which will cause them to go out of sync if they aren't all exactly the same length.
+    * Even if songs are the same length, in some cases they can still go out of sync during a loop. This is a tricky problem to troubleshoot, and the best I can offer you is that it's best to use sound files that are optimized for looping. For example, sometimes compressed audio files will go out of sync depending on how they were compressed. In my experience, compressing each audio source of a single playlist sound to .ogg using the exact same bitrate seems to usually work, but I am unfortunately not an audio expert. In the worst case scenario, if you have access to original uncompressed audio files, those should always work assuming they are all the same length.
+
+### Starting Unloaded Sounds
+* Each client will have to download each sound layer before they can each start playing it. Crossblade will always attempt to start playing the base sound layer as soon as it's loaded, but if the sound is configured to fade out the main layer based on the current event when the sound first starts, there may be some silence until the layers that are supposed to fade in are fully loaded. Crossblade will attempt to preload the following tracks in a playlist a bit before they are set to play automatically.
+
+### Data Transfer and Loading Limitations
+* Due to loading multiple audio sources per playlist sound, Crossblade is a rather data intensive module, so you should think twice about using it if you or your players have poor connections or data limits.
+* There is currently a limit on the amount of playlist audio data that can be loaded in a session by Foundry. It's a fairly large number, but due to Crossblade's loading of multiple audio sources per sound, it's a fair bit easier to run into it. When the limit is reached, no other sounds will be able to be loaded but previously loaded sounds can continue to be played.
+     * If a client is connected using the standalone application, this can cause the canvas and ui to disappear. This won't affect clients connecting via a full browser like Chrome or Firefox.
+     * All clients can resolve the issue by refreshing the window/tab as this will clear all the cached audio data for the session.
+     * There is currently no way to uncache this data aside from refreshing.
+     * Again, this is an issue that exists in core Foundry and I am unable to do anything about it. If you are careful with how many layers your sounds have, you should be fine.
 
 If you find this module useful, consider [buying me a coffee](https://ko-fi.com/element_re "Buy me a coffee!")!
