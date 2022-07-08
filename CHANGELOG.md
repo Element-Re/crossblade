@@ -1,3 +1,6 @@
+### 1.1.1
+- [Fixed] Resolved issue that could cause player clients to not load sound layers until an event occurred
+
 ### 1.1.0
 - [Changed] Much of the module has undergone a major rewrite
 - [New] Crossblade now supports configuring custom events for layers than can be manually triggered via a macro or [input directly from the playlists sidebar](https://user-images.githubusercontent.com/86752832/177448150-31d0237d-54da-44d7-9502-f70b767a1aba.png). Custom events take priority over standard events
