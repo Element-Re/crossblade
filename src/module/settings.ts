@@ -1,5 +1,7 @@
 import { CrossbladeController, log, MODULE_ID } from './utils';
 
+const debouncedReload = foundry.utils.debounce(() => window.location.reload(), 250);
+
 export function registerSettings(): void {
   // Register any custom module settings
 
@@ -10,9 +12,7 @@ export function registerSettings(): void {
     config: true,
     type: Boolean,
     default: true,
-    onChange: async () => {
-      CrossbladeController.crossfadePlaylists();
-    },
+    onChange: debouncedReload,
   });
 
   // Internal Module Migration Version
@@ -35,8 +35,12 @@ export function registerSettings(): void {
         if (value) log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.SetTo', { value: value }));
         else log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.Cleared'));
       }
-      ui.playlists.render();
-      CrossbladeController.crossfadePlaylists();
+      if (game.settings.get(MODULE_ID, 'enable') === true) {
+        if (game.user?.isGM) {
+          ui.playlists.render();
+        }
+        CrossbladeController.crossfadePlaylists();
+      }
     },
   });
 
@@ -53,7 +57,7 @@ export function registerSettings(): void {
     },
     default: 'DROPDOWN',
     onChange: async () => {
-      if (game.user?.isGM) {
+      if (game.user?.isGM && game.settings.get(MODULE_ID, 'enable') === true) {
         ui.playlists.render();
       }
     },
@@ -77,11 +81,14 @@ export function registerSettings(): void {
     default: true,
     onChange: (value) => {
       if (game.user?.isGM) {
-        log(`CROSSBLADE.Settings.Events.CombatEvents.${value ? 'Enabled' : 'Disabled'}`);
+        log(game.i18n.localize(`CROSSBLADE.Settings.Events.CombatEvents.${value ? 'Enabled' : 'Disabled'}`));
       }
-      CrossbladeController.crossfadePlaylists();
+      if (game.settings.get(MODULE_ID, 'enable') === true) {
+        CrossbladeController.crossfadePlaylists();
+      }
     },
   });
+
   game.settings.register(MODULE_ID, 'combatPauseEvent', {
     name: 'CROSSBLADE.Settings.Events.CombatPauseEvent.Name',
     hint: 'CROSSBLADE.Settings.Events.CombatPauseEvent.Hint',
@@ -91,9 +98,11 @@ export function registerSettings(): void {
     default: true,
     onChange: (value) => {
       if (game.user?.isGM) {
-        log(`CROSSBLADE.Settings.Events.CombatPauseEvent.${value ? 'Enabled' : 'Disabled'}`);
+        log(game.i18n.localize(`CROSSBLADE.Settings.Events.CombatPauseEvent.${value ? 'Enabled' : 'Disabled'}`));
       }
-      CrossbladeController.crossfadePlaylists();
+      if (game.settings.get(MODULE_ID, 'enable') === true) {
+        CrossbladeController.crossfadePlaylists();
+      }
     },
   });
 }

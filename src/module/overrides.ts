@@ -1,4 +1,5 @@
 import CrossbladeSoundConfig from './CrossbladeSoundConfig';
+import { libWrapper } from './shim';
 import { CrossbladePlaylistSound, DevModeModuleData } from './types';
 import {
   getCrossfadeVolume,
@@ -10,7 +11,50 @@ import {
   MODULE_ID,
 } from './utils';
 
-export namespace PlaylistOverrides {
+export function registerCriticalOverrides() {
+  // Right-click context menu for sounds
+  libWrapper.register(
+    MODULE_ID,
+    'PlaylistDirectory.prototype._getSoundContextOptions',
+    PlaylistDirectoryOverrides._getSoundContextOptionsWrapper,
+    'WRAPPER',
+  );
+}
+
+export function registerOptionalOverrides() {
+  // PlaylistSound Overrides
+  Object.defineProperty(PlaylistSound.prototype, 'cbSoundLayers', {
+    get: PlaylistSoundOverrides.crossbladeSoundsGetter,
+  });
+  libWrapper.register(MODULE_ID, 'PlaylistSound.prototype.sync', PlaylistSoundOverrides.syncWrapper, 'MIXED');
+  libWrapper.register(
+    MODULE_ID,
+    'PlaylistSound.prototype._onUpdate',
+    PlaylistSoundOverrides._onUpdateWrapper,
+    'OVERRIDE',
+  );
+  libWrapper.register(
+    MODULE_ID,
+    'PlaylistSound.prototype._onStart',
+    PlaylistSoundOverrides._onStartWrapper,
+    'OVERRIDE',
+  );
+  libWrapper.register(MODULE_ID, 'PlaylistSound.prototype._fadeIn', PlaylistSoundOverrides._fadeInWrapper, 'OVERRIDE');
+
+  // Playlist overrides
+  libWrapper.register(MODULE_ID, 'Playlist.prototype._onSoundStart', PlaylistOverrides._onSoundStartWrapper, 'WRAPPER');
+  libWrapper.register(MODULE_ID, 'Playlist.prototype._onDelete', PlaylistOverrides._onDeleteWrapper, 'WRAPPER');
+
+  // Playlist directory (sidebar list) overrides
+  libWrapper.register(
+    MODULE_ID,
+    'PlaylistDirectory.prototype._onSoundVolume',
+    PlaylistDirectoryOverrides._onSoundVolumeWrapper,
+    'WRAPPER',
+  );
+}
+
+namespace PlaylistOverrides {
   export async function _onSoundStartWrapper(
     this: Playlist,
     wrapped: (sound: PlaylistSound) => void,
@@ -47,7 +91,7 @@ export namespace PlaylistOverrides {
   }
 }
 
-export namespace PlaylistSoundOverrides {
+namespace PlaylistSoundOverrides {
   export function crossbladeSoundsGetter(this: CrossbladePlaylistSound) {
     if (!this._cbSoundLayers) {
       this._cbSoundLayers = generateCrossbladeSounds(this);
@@ -159,7 +203,7 @@ export namespace PlaylistSoundOverrides {
   }
 }
 
-export namespace PlaylistDirectoryOverrides {
+namespace PlaylistDirectoryOverrides {
   interface MenuItem {
     name: string;
     icon: string;

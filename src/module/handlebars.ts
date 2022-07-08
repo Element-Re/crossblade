@@ -1,4 +1,4 @@
-import { log } from './utils';
+import { inHelper, log } from './utils';
 
 export async function preloadTemplates(): Promise<Handlebars.TemplateDelegate[]> {
   log('Preloading templates...');
@@ -17,4 +17,8 @@ export async function preloadTemplates(): Promise<Handlebars.TemplateDelegate[]>
     Handlebars.registerPartial('crossbladeSoundEventSubcontrol', templates[subcontrolTemplateIndex]);
     return templates;
   });
+}
+
+export function registerHandlebarsHelpers() {
+  Handlebars.registerHelper('crossblade_in', inHelper);
 }

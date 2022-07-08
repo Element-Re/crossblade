@@ -1,6 +1,6 @@
 {
   "CROSSBLADE.Settings.Module.Enable.Name": "Enable Crossblade",
-  "CROSSBLADE.Settings.Module.Enable.Hint": "Enable sound layer crossfading. Clients will still load sound layer data when disabled. The GM must disable the module to disable sound layer processing entirely.",
+  "CROSSBLADE.Settings.Module.Enable.Hint": "Clients can disable this setting to prevent loading additional sound layers, which can save on bandwidth. Changing this setting will trigger a refresh of the Foundry session.",
   "CROSSBLADE.Settings.Events.CombatEvents.Name": "Combat Events",
   "CROSSBLADE.Settings.Events.CombatEvents.Hint": "Process combat events, such as when a combatant starts their turn.",
   "CROSSBLADE.Settings.Events.CombatEvents.Enabled": "Combat events enabled",
