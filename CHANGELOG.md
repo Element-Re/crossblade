@@ -1,5 +1,5 @@
 ### 1.1.2
-- [Changed] Disabling the "Enable Crossblade" client sound now really disables most of Crossblades functionality, including loading audio data for extra sound layers, which should help when using Crossblade with clients that have poor connections or data limits. A GM client with the setting disabled can still edit sound layer data and set custom events, but will not load sound layer audio data or hear the extra sound layers fade in or out.
+- [Changed] Disabling the "Enable Crossblade" client setting now really disables most of Crossblades functionality, including loading audio data for extra sound layers, which should help when using Crossblade with clients that have poor connections or data limits. A GM client with the setting disabled can still edit sound layer data and set custom events, but will not load sound layer audio data or hear the extra sound layers fade in or out.
 
 ### 1.1.1
 - [Fixed] Resolved issue that could cause player clients to not load sound layers until an event occurred
