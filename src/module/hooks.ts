@@ -87,30 +87,28 @@ export function registerCriticalHooks() {
 }
 
 export function registerOptionalHooks() {
-  Hooks.on('updateCombat', async () => {
+  Hooks.on('updateCombat', () => {
     if (game.settings.get(MODULE_ID, 'combatEvents') === true) {
       CrossbladeController.crossfadePlaylists();
     }
   });
 
-  Hooks.on('deleteCombat', async () => {
+  Hooks.on('deleteCombat', () => {
     if (game.settings.get(MODULE_ID, 'combatEvents') === true) {
       CrossbladeController.crossfadePlaylists();
     }
   });
 
-  Hooks.on('pauseGame', async () => {
+  Hooks.on('pauseGame', () => {
     CrossbladeController.crossfadePlaylists();
   });
 
-  Hooks.on('globalPlaylistVolumeChanged', async () => {
+  Hooks.on('globalPlaylistVolumeChanged', () => {
     CrossbladeController.crossfadePlaylists();
   });
 
   Hooks.once('ready', () => {
-    if (game.settings.get(MODULE_ID, 'enable') === true) {
-      CrossbladeController.crossfadePlaylists();
-    }
+    CrossbladeController.crossfadePlaylists();
   });
 
   // Right-click menu context hook for playlists
