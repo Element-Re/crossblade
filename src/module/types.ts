@@ -28,13 +28,25 @@ export interface PlaylistSoundUpdateData {
 }
 
 export abstract class CrossbladePlaylistSound extends PlaylistSound {
-  cbSoundLayers?: Map<Sound, string[]>;
-  protected _cbSoundLayers?: Map<Sound, string[]>;
+  cbSoundLayers?: Map<Sound, SoundLayerData>;
+  protected _cbSoundLayers?: Map<Sound, SoundLayerData>;
 }
 
-export interface SoundLayer {
-  src?: string;
-  events?: string[][];
+/**
+ * Sound layer data mapped to a instantiated Sound object.
+ */
+export interface SoundLayerData {
+  volume?: number;
+  events: string[];
+}
+
+/**
+ *  Sound layer data stored in a flag on a PlaylistSound.
+ */
+export interface SoundLayerFlagData {
+  src: string;
+  volume?: number;
+  events: string[][];
 }
 
 //////////////
@@ -76,14 +88,9 @@ export interface CrossbladeEvent {
 
 export type CrossbladeEventKey = 'DEFAULT' | 'COMBATANT' | /* 'COMBATANT_TAG' | */ 'GAME' | 'CUSTOM';
 
-export interface CrossbladeSoundLayer extends Record<string, string | string[][]> {
-  src: string;
-  events: string[][];
-}
-
 export interface CrossbladeFlags {
   crossblade?: {
-    soundLayers?: CrossbladeSoundLayer[];
+    soundLayers?: SoundLayerFlagData[];
   };
 }
 

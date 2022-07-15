@@ -169,6 +169,7 @@ export function registerOptionalHooks() {
                   (pls) =>
                     pls.playing &&
                     [...((pls as CrossbladePlaylistSound).cbSoundLayers?.values() ?? [])]
+                      .map((l) => l.events)
                       .flat()
                       .some((event) => event === formattedCustomEvent),
                 ),

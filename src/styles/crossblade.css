@@ -22,6 +22,10 @@
   white-space: nowrap;
 }
 
+.crossblade-sound-layer-volume:disabled {
+  opacity: 30%;
+}
+
 .crossblade-sound-config .crossblade-sound-layer > .section-header {
   padding: 2px;
   background: rgba(0, 0, 0, 0.05);

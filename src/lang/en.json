@@ -30,7 +30,7 @@
   "CROSSBLADE.Sound.Layer.Add": "Add Crossblade Sound Layer",
   "CROSSBLADE.Sound.Layer.Remove": "Remove Crossblade Sound Layer",
   "CROSSBLADE.Sound.Layer.SoundSrc": "Layer Audio Source",
-  "CROSSBLADE.Sound.Layer.ActiveVolume": "Active Volume",
+  "CROSSBLADE.Sound.Layer.SoundVolume": "Layer Volume",
   "CROSSBLADE.Sound.Layer.Event.Add": "Add Event",
   "CROSSBLADE.Sound.Layer.Event.Remove": "Remove Event",
   "CROSSBLADE.Sound.ConfigSection": "Crossblade Configuration",

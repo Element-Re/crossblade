@@ -13,8 +13,12 @@ export async function preloadTemplates(): Promise<Handlebars.TemplateDelegate[]>
   const subcontrolTemplateIndex = templatePaths.indexOf(
     'modules/crossblade/templates/crossblade-sound-event-subcontrol.hbs',
   );
+  const soundLayerTemplateIndex = templatePaths.indexOf('modules/crossblade/templates/crossblade-sound-layer.hbs');
+  const eventTemplateIndex = templatePaths.indexOf('modules/crossblade/templates/crossblade-sound-event.hbs');
   return loadTemplates(templatePaths).then((templates) => {
     Handlebars.registerPartial('crossbladeSoundEventSubcontrol', templates[subcontrolTemplateIndex]);
+    Handlebars.registerPartial('crossbladeSoundLayer', templates[soundLayerTemplateIndex]);
+    Handlebars.registerPartial('crossbladeSoundEvent', templates[eventTemplateIndex]);
     return templates;
   });
 }

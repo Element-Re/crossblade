@@ -1,5 +1,5 @@
 import { ConfiguredDocumentClass } from '@league-of-foundry-developers/foundry-vtt-types/src/types/helperTypes';
-import { CrossbladeEventKey, CrossbladeFlags } from './types';
+import { CrossbladeEventKey, CrossbladeFlags, SoundLayerFlagData } from './types';
 import { CROSSBLADE_EVENTS, debug } from './utils';
 
 export default class CrossbladeSoundConfig<
@@ -23,7 +23,15 @@ export default class CrossbladeSoundConfig<
   async getData(options: Options) {
     const data = await super.getData(options);
     debug('getData', options, data);
-    data.data = this.object.data;
+    const dataCopy = this.object.data.toObject();
+    // Convert layer volumes to input values
+    (getProperty(dataCopy, 'flags.crossblade.soundLayers') as SoundLayerFlagData[]).forEach((sl) => {
+      if (sl.volume) {
+        sl.volume = AudioHelper.volumeToInput(sl.volume);
+      }
+    });
+    data.data = dataCopy;
+    data.baseVolume = AudioHelper.volumeToInput(this.object.data.volume);
     data.crossbladeEvents = CROSSBLADE_EVENTS;
 
     debug('data', data);
@@ -62,16 +70,16 @@ export default class CrossbladeSoundConfig<
     });
   }
   protected async _onCrossbladeChangeControl(event: JQuery.ChangeEvent) {
-    debug('change Event...', event);
-    const select = event.currentTarget as HTMLSelectElement;
-    const $select = $(select);
-    if (select.classList.contains('change-event')) {
-      const subControl = $select.siblings('.event-subcontrol');
-      const event = CROSSBLADE_EVENTS[select.value as CrossbladeEventKey];
-      debug('event', event);
-      const layerIndex = $select.parents('.crossblade-sound-layer').data('layer');
-      const eventIndex = $select.parents('.crossblade-event').data('event');
-      //const layerIndex =
+    debug('change JQuery Event...', event);
+    const element = event.currentTarget as HTMLSelectElement | HTMLInputElement;
+    const $element = $(element);
+    // Confusing, but crossblade-event-type here has nothing to do with the jQuery change event that just fired.
+    // Rather we're noting the type of the crossblade event we just changed to.
+    if (element.classList.contains('crossblade-event-type')) {
+      const subControl = $element.siblings('.event-subcontrol');
+      const event = CROSSBLADE_EVENTS[element.value as CrossbladeEventKey];
+      const layerIndex = $element.parents('.crossblade-sound-layer').data('layer');
+      const eventIndex = $element.parents('.crossblade-event').data('event');
       const newContent = await renderTemplate('modules/crossblade/templates/crossblade-sound-event-subcontrol.hbs', {
         options: event.options,
         manualEntry: event.manualEntry,
@@ -80,15 +88,21 @@ export default class CrossbladeSoundConfig<
       });
       subControl.replaceWith(newContent);
     }
+
+    if (element.classList.contains('toggle-crossblade-sound-layer-volume')) {
+      const checked = $element.is(':checked');
+      const $volumeInput = $element.siblings('.crossblade-sound-layer-volume');
+      $volumeInput.prop('disabled', !checked);
+    }
   }
 
   protected async _onCrossbladeClickControl(event: JQuery.ClickEvent) {
-    debug('click Event...', event);
+    debug('click JQuery Event...', event);
     event.preventDefault();
     event.stopPropagation();
     const a = event.currentTarget as HTMLAnchorElement;
     // Add new layer component
-    if (a.classList.contains('add-layer')) {
+    if (a.classList.contains('add-crossblade-sound-layer')) {
       debug('adding Layer...');
       const form = $(a).parents('form');
       debug('form', form);
@@ -96,6 +110,7 @@ export default class CrossbladeSoundConfig<
       const soundLayersSection = form.find('#soundLayers');
       const newContent = await renderTemplate('modules/crossblade/templates/crossblade-sound-layer.hbs', {
         index: randomID(),
+        baseVolume: AudioHelper.volumeToInput(this.object.data.volume),
         crossbladeEvents: CROSSBLADE_EVENTS,
       });
 
@@ -107,7 +122,7 @@ export default class CrossbladeSoundConfig<
     }
 
     // Remove a layer
-    if (a.classList.contains('delete-layer')) {
+    if (a.classList.contains('delete-crossblade-sound-layer')) {
       debug('deleting Layer...');
       const layerContainer = a.closest('.crossblade-sound-layer');
       layerContainer?.remove();
@@ -115,7 +130,7 @@ export default class CrossbladeSoundConfig<
     }
 
     // Add an event
-    if (a.classList.contains('add-event')) {
+    if (a.classList.contains('add-crossblade-event')) {
       debug('adding Event...');
       const soundLayer = $(a).parents('.crossblade-sound-layer');
       const events = soundLayer.find('.crossblade-events');
@@ -133,7 +148,7 @@ export default class CrossbladeSoundConfig<
     }
 
     // Remove an event
-    if (a.classList.contains('delete-event')) {
+    if (a.classList.contains('delete-crossblade-event')) {
       debug('deleting Event...');
       const eventContainer = a.closest('.crossblade-event');
       eventContainer?.remove();
@@ -150,7 +165,7 @@ export default class CrossbladeSoundConfig<
     const crossbladeFlags = flags.crossblade || {};
     debug('crossbladeFlags', crossbladeFlags);
     const soundLayers = crossbladeFlags.soundLayers || {};
-    const soundLayersArray = [...Object.values(soundLayers)] as { events?: object }[];
+    const soundLayersArray = [...Object.values(soundLayers)] as { events?: object; volume?: number }[];
     soundLayersArray.forEach((soundLayer) => {
       const events = soundLayer.events ?? {};
       const eventsArray = Array.from(Object.values(events)).map((event) => {
@@ -158,6 +173,9 @@ export default class CrossbladeSoundConfig<
         return (Array.isArray(event) ? event.slice(0, 2) : [event]).map((part) => part.toString().trim());
       });
       soundLayer.events = eventsArray;
+      if (soundLayer.volume) {
+        soundLayer.volume = AudioHelper.inputToVolume(soundLayer.volume);
+      }
     });
     debug('soundLayersArray', soundLayersArray);
     return this.object.unsetFlag('crossblade', 'soundLayers').then(() => {
@@ -176,9 +194,10 @@ namespace CrossbladeSoundConfig {
   export interface Data<Options extends CrossbladeSoundConfig.Options = CrossbladeSoundConfig.Options>
     extends PlaylistSoundConfig<Options, Data> {
     data: {
-      flags: { crossblade?: { disp_trigger?: string[] } };
+      flags: { crossblade?: CrossbladeFlags };
     };
     crossbladeEvents?: typeof CROSSBLADE_EVENTS;
+    baseVolume: number;
   }
   export type Options = DocumentSheetOptions;
 }

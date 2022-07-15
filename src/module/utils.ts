@@ -4,7 +4,8 @@ import {
   CrossbladeFlags,
   CrossbladePlaylistSound,
   DevModeModuleData,
-  SoundLayer,
+  SoundLayerData,
+  SoundLayerFlagData,
 } from './types';
 
 export const CROSSBLADE_EVENTS: Record<CrossbladeEventKey, CrossbladeEvent> = {
@@ -55,6 +56,7 @@ export function inHelper(iterable: Iterable<any> | undefined | null, toCheck: an
 export function getCrossbladeSound(src: string, basedOn: PlaylistSound) {
   try {
     if (!basedOn.id || !basedOn.data.path) return null;
+    // Use the base sound if it matches the layer audio source, or create a new one.
     const sound = basedOn.sound?.src === src ? basedOn.sound : createCrossbladeSound.bind(basedOn)(src);
     return sound;
   } catch (e) {
@@ -91,8 +93,12 @@ function _determineCrossbladeEvent(): string {
   }
 }
 
-export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, volume: number = pls.volume) {
-  const soundLayers = pls.cbSoundLayers ?? new Map<Sound, string[]>();
+export function getCrossfadeVolume(
+  pls: CrossbladePlaylistSound,
+  sound: Sound,
+  volume: number = pls.cbSoundLayers?.get(sound)?.volume ?? pls.volume,
+) {
+  const soundLayers = pls.cbSoundLayers ?? new Map<Sound, SoundLayerData>();
   // Default volume --- Only activate if this is the base sound;
   let fadeVolume = pls.sound === sound ? volume : 0;
   // If crossblade is enabled and and this PlaylistSound has crossblade sound layers
@@ -101,20 +107,32 @@ export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound, v
     debug('Crossblade Event:', crossbladeEvent);
     const customEvent = CrossbladeController.customEvent;
     debug('Custom Event:', customEvent);
-    if (customEvent && [...soundLayers.values()].flat().includes(customEvent)) {
+    if (
+      customEvent &&
+      [...soundLayers.values()]
+        .map((l) => l.events)
+        .flat()
+        .includes(customEvent)
+    ) {
       // Use custom event if it applies to at least one layer
       crossbladeEvent = customEvent;
-    } else if (crossbladeEvent !== 'DEFAULT' && ![...soundLayers.values()].flat().includes(crossbladeEvent)) {
+    } else if (
+      crossbladeEvent !== 'DEFAULT' &&
+      ![...soundLayers.values()]
+        .map((l) => l.events)
+        .flat()
+        .includes(crossbladeEvent)
+    ) {
       // Default event if current event applies to no layers
       crossbladeEvent = 'DEFAULT';
     }
     debug('Crossblade Event (Final)', crossbladeEvent);
     debug('Sound Layer Events:', [...soundLayers.values()].flat());
     const currentEventSounds = new Set(
-      [...soundLayers.entries()].filter((entry) => entry[1].includes(crossbladeEvent)).map((entry) => entry[0]),
+      [...soundLayers.entries()].filter((entry) => entry[1].events.includes(crossbladeEvent)).map((entry) => entry[0]),
     );
     const otherEventSounds = new Set(
-      [...soundLayers.entries()].filter((entry) => !entry[1].includes(crossbladeEvent)).map((entry) => entry[0]),
+      [...soundLayers.entries()].filter((entry) => !entry[1].events.includes(crossbladeEvent)).map((entry) => entry[0]),
     );
 
     // If this event has sounds
@@ -156,25 +174,26 @@ export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
 
 export function generateCrossbladeSounds(pls: PlaylistSound) {
   debug('generateCrossbladeSounds');
-  const crossbladeSounds = new Map<Sound, string[]>();
+  const crossbladeSounds = new Map<Sound, SoundLayerData>();
 
-  const soundLayers = pls.getFlag('crossblade', 'soundLayers') as SoundLayer[] | undefined;
+  const soundLayers = pls.getFlag('crossblade', 'soundLayers') as SoundLayerFlagData[] | undefined;
   debug('soundLayers', soundLayers);
   if (Array.isArray(soundLayers)) {
     soundLayers?.forEach((sl) => {
       if (sl.src && sl.events && sl.events.length > 0) {
-        // Use the base sound if it matches the layer, or create a new one.
         const layerSound = getCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
           debug('events', sl.events);
-          crossbladeSounds.set(
-            layerSound,
-            sl.events
+          const soundLayerData = {
+            events: sl.events
               .filter((event) => Array.isArray(event) && event.length)
               // Maps ['COMBATANT', 'HOSTILE'] as 'COMBATANT: HOSTILE'
               // Easier to check if an event matches
               .map((event) => event.slice(0, 2).join(': ').toUpperCase()),
-          );
+          } as SoundLayerData;
+          if (sl.volume)
+            soundLayerData.volume = Math.clamped(sl.volume, 0, 1) * game.settings.get('core', 'globalPlaylistVolume');
+          crossbladeSounds.set(layerSound, soundLayerData);
         }
       }
     });
