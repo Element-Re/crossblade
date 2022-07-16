@@ -36,7 +36,7 @@ export abstract class CrossbladePlaylistSound extends PlaylistSound {
  * Sound layer data mapped to a instantiated Sound object.
  */
 export interface SoundLayerData {
-  volume?: number;
+  volumeAdjustment?: number;
   events: string[];
 }
 
@@ -45,7 +45,7 @@ export interface SoundLayerData {
  */
 export interface SoundLayerFlagData {
   src: string;
-  volume?: number;
+  volumeAdjustment?: number;
   events: string[][];
 }
 

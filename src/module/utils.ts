@@ -93,14 +93,11 @@ function _determineCrossbladeEvent(): string {
   }
 }
 
-export function getCrossfadeVolume(
-  pls: CrossbladePlaylistSound,
-  sound: Sound,
-  volume: number = pls.cbSoundLayers?.get(sound)?.volume ?? pls.volume,
-) {
+export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound) {
+  const fadeInVolume = pls.volume * Math.clamped(pls.cbSoundLayers?.get(sound)?.volumeAdjustment ?? 1, 0, 1);
   const soundLayers = pls.cbSoundLayers ?? new Map<Sound, SoundLayerData>();
   // Default volume --- Only activate if this is the base sound;
-  let fadeVolume = pls.sound === sound ? volume : 0;
+  let fadeVolume = pls.sound === sound ? fadeInVolume : 0;
   // If crossblade is enabled and and this PlaylistSound has crossblade sound layers
   if (game.settings.get(MODULE_ID, 'enable') === true && soundLayers.size) {
     let crossbladeEvent = CrossbladeController.event;
@@ -138,7 +135,7 @@ export function getCrossfadeVolume(
     // If this event has sounds
     if (currentEventSounds.size) {
       if (currentEventSounds.has(sound)) {
-        fadeVolume = volume;
+        fadeVolume = fadeInVolume;
       } else if (otherEventSounds.has(sound) || pls.sound === sound) {
         fadeVolume = 0;
       }
@@ -161,17 +158,6 @@ export function getLayerOnlyCrossbladeSounds(pls: CrossbladePlaylistSound) {
   return uniqueSounds;
 }
 
-export async function localFade(pls: CrossbladePlaylistSound, volume: number) {
-  const localVolume = volume * game.settings.get('core', 'globalPlaylistVolume');
-  if (pls.cbSoundLayers && pls.sound) {
-    getUniqueCrossbladeSounds(pls).forEach(async (s) => {
-      s.fade(getCrossfadeVolume(pls, s, localVolume), {
-        duration: PlaylistSound.VOLUME_DEBOUNCE_MS,
-      });
-    });
-  }
-}
-
 export function generateCrossbladeSounds(pls: PlaylistSound) {
   debug('generateCrossbladeSounds');
   const crossbladeSounds = new Map<Sound, SoundLayerData>();
@@ -184,15 +170,16 @@ export function generateCrossbladeSounds(pls: PlaylistSound) {
         const layerSound = getCrossbladeSound(sl.src, pls);
         if (layerSound && !layerSound?.failed) {
           debug('events', sl.events);
-          const soundLayerData = {
+          const soundLayerData: SoundLayerData = {
             events: sl.events
               .filter((event) => Array.isArray(event) && event.length)
               // Maps ['COMBATANT', 'HOSTILE'] as 'COMBATANT: HOSTILE'
               // Easier to check if an event matches
               .map((event) => event.slice(0, 2).join(': ').toUpperCase()),
-          } as SoundLayerData;
-          if (sl.volume)
-            soundLayerData.volume = Math.clamped(sl.volume, 0, 1) * game.settings.get('core', 'globalPlaylistVolume');
+          };
+          if (sl.volumeAdjustment) {
+            soundLayerData.volumeAdjustment = sl.volumeAdjustment;
+          }
           crossbladeSounds.set(layerSound, soundLayerData);
         }
       }
@@ -263,6 +250,28 @@ export function getPlayingCustomEvents(options = { sort: false }) {
 
   return new Set(options.sort ? events?.sort() : events);
 }
+// /**
+//  * Gets the current volume for a Crossblade PlaylistSound, which may have been modified by this client when they are not the sound's owner while it is currently playing.
+//  * @param pls The sound to get the current volume for.
+//  * @returns The current volume compared to the baseline based on the what the input of the PlaylistSound is set to for non-owners, or the actual sound volume for owners.
+//  */
+// export function getCurrentVolume(pls: CrossbladePlaylistSound) {
+//   debug('in getCurrentVolume', pls.name);
+//   if (!pls.isOwner && pls.id && pls.parent?.id) {
+//     // The adjusted-volume class indicates that the client has adjusted the volume locally.
+//     const inputVolumeValue = $(
+//       `#sidebar #playlists #currently-playing ol.playlist-sounds li.sound.playing[data-playlist-id=${pls.parent.id}][data-sound-id=${pls.id}] input.sound-volume.adjusted-volume`,
+//     ).val();
+//     const inputVolume = Number(inputVolumeValue);
+//     debug('inputVolume', inputVolume, typeof inputVolume);
+//     if (inputVolume) {
+//       const currentVolume = AudioHelper.inputToVolume(inputVolume) * game.settings.get('core', 'globalPlaylistVolume');
+//       debug('currentVolume', currentVolume);
+//       return currentVolume;
+//     }
+//   }
+//   return pls.volume;
+// }
 
 export function getAllCustomEvents(options = { sort: false }) {
   const events = game.playlists?.contents

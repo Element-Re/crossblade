@@ -5,7 +5,6 @@ import {
   getCrossfadeVolume,
   generateCrossbladeSounds,
   debug,
-  localFade,
   getUniqueCrossbladeSounds,
   clearCrossbladeData,
   MODULE_ID,
@@ -269,10 +268,12 @@ namespace PlaylistDirectoryOverrides {
       const playlistId = $soundElement.data('playlist-id');
       const soundId = $soundElement.data('sound-id');
       const sound = game.playlists?.find((p) => p.id === playlistId)?.sounds.find((s) => s.id === soundId);
-      const volume = AudioHelper.inputToVolume($(slider).val() as number);
       debug(slider, $soundElement, playlistId, soundId);
       if (sound && !sound.isOwner) {
-        localFade(sound, volume);
+        // Change volume in memory... which could change when the sound is updated
+        // by an owner or otherwise refreshed (which should be what we want).
+        sound.data.volume = AudioHelper.inputToVolume($(slider).val() as number);
+        sound.sync();
       }
     }
     return result;

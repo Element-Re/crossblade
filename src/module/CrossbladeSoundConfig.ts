@@ -1,5 +1,5 @@
 import { ConfiguredDocumentClass } from '@league-of-foundry-developers/foundry-vtt-types/src/types/helperTypes';
-import { CrossbladeEventKey, CrossbladeFlags, SoundLayerFlagData } from './types';
+import { CrossbladeEventKey, CrossbladeFlags } from './types';
 import { CROSSBLADE_EVENTS, debug } from './utils';
 
 export default class CrossbladeSoundConfig<
@@ -23,15 +23,7 @@ export default class CrossbladeSoundConfig<
   async getData(options: Options) {
     const data = await super.getData(options);
     debug('getData', options, data);
-    const dataCopy = this.object.data.toObject();
-    // Convert layer volumes to input values
-    (getProperty(dataCopy, 'flags.crossblade.soundLayers') as SoundLayerFlagData[]).forEach((sl) => {
-      if (sl.volume) {
-        sl.volume = AudioHelper.volumeToInput(sl.volume);
-      }
-    });
-    data.data = dataCopy;
-    data.baseVolume = AudioHelper.volumeToInput(this.object.data.volume);
+    data.data = this.object.data;
     data.crossbladeEvents = CROSSBLADE_EVENTS;
 
     debug('data', data);
@@ -110,7 +102,6 @@ export default class CrossbladeSoundConfig<
       const soundLayersSection = form.find('#soundLayers');
       const newContent = await renderTemplate('modules/crossblade/templates/crossblade-sound-layer.hbs', {
         index: randomID(),
-        baseVolume: AudioHelper.volumeToInput(this.object.data.volume),
         crossbladeEvents: CROSSBLADE_EVENTS,
       });
 
@@ -197,7 +188,6 @@ namespace CrossbladeSoundConfig {
       flags: { crossblade?: CrossbladeFlags };
     };
     crossbladeEvents?: typeof CROSSBLADE_EVENTS;
-    baseVolume: number;
   }
   export type Options = DocumentSheetOptions;
 }
