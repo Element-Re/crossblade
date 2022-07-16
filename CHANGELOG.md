@@ -1,5 +1,6 @@
 ### 1.1.3
-- [New] Crossblade sound layers can now optionally specify a volume to use when fading in instead of the PlaylistSound's base volume. Useful for tweaking sound layers that are abnormally loud or quiet compared to others.
+- [New] The volume for faded-in sound layers can now be optionally be adjusted to be lower compared to the PlaylistSound's base volume. Useful for tweaking sound layers that are abnormally loud compared to others.
+- [Fixed] Non-owner changes to a playing PlaylistSound's volume (local fade) will now be reflected in subsequent fades for all layers for as long as the sound plays or until the sound is updated by an owner.
 
 ### 1.1.2
 - [Changed] Disabling the "Enable Crossblade" client setting now really disables most of Crossblades functionality, including loading audio data for extra sound layers, which should help when using Crossblade with clients that have poor connections or data limits. A GM client with the setting disabled can still edit sound layer data and set custom events, but will not load sound layer audio data or hear the extra sound layers fade in or out.
