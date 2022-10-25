@@ -23,7 +23,9 @@ export default class CrossbladeSoundConfig<
   async getData(options: Options) {
     const data = await super.getData(options);
     debug('getData', options, data);
-    data.data = this.object.data;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore TODO: v10 type implementation for this.object
+    data.data = this.object;
     data.crossbladeEvents = CROSSBLADE_EVENTS;
 
     debug('data', data);

@@ -11,7 +11,9 @@ import { debug, log, MODULE_ID } from './utils';
 export const migrateWorld = async function (): Promise<any> {
   const module = game.modules.get(MODULE_ID) as CrossbladeModule;
   if (!module) return;
-  const version = module.data.version;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore TODO: v10 type implementation for module.version
+  const version = module.version;
   ui.notifications.info(game.i18n.format('CROSSBLADE.Migration.Begin', { version }), { permanent: true });
 
   // Migrate World PlaylistSounds

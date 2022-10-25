@@ -128,7 +128,7 @@ Hooks.once('init', () => {
       if (match[1] === 'worlds')
         return dirs.find((n) => n && game.world.id === n) ? [game.world.id, game.world.title] : [null, null];
       if (match[1] === 'systems')
-        return dirs.find((n) => n && game.system.id === n) ? [game.system.id, game.system.data.title] : [null, null];
+        return dirs.find((n) => n && game.system.id === n) ? [game.system.id, game.system.title] : [null, null];
       const id = dirs.find((n) => n && game.modules.has(n));
       return [id, game.modules.get(id)?.data?.title];
     })();

@@ -55,7 +55,7 @@ export function inHelper(iterable: Iterable<any> | undefined | null, toCheck: an
 
 export function getCrossbladeSound(src: string, basedOn: PlaylistSound) {
   try {
-    if (!basedOn.id || !basedOn.data.path) return null;
+    if (!basedOn.id || !basedOn.path) return null;
     // Use the base sound if it matches the layer audio source, or create a new one.
     const sound = basedOn.sound?.src === src ? basedOn.sound : createCrossbladeSound.bind(basedOn)(src);
     return sound;
@@ -81,7 +81,9 @@ function _determineCrossbladeEvent(): string {
 
   if (combatPauseEvent && game.paused) return 'GAME: PAUSED';
   if (!combatEvents || !game.combat?.started) return game.paused ? 'GAME_PAUSED' : 'DEFAULT';
-  switch (game.combat?.combatant?.token?.data.disposition) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore TODO: v10 type implementation for game.combat?.combatant?.token?.disposition
+  switch (game.combat?.combatant?.token?.disposition) {
     case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
       return 'COMBATANT: FRIENDLY';
     case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
@@ -94,7 +96,10 @@ function _determineCrossbladeEvent(): string {
 }
 
 export function getCrossfadeVolume(pls: CrossbladePlaylistSound, sound: Sound) {
-  const fadeInVolume = pls.volume * Math.clamped(pls.cbSoundLayers?.get(sound)?.volumeAdjustment ?? 1, 0, 1);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore TODO: v10 type implementation for pls.effectiveVolume
+  const fadeInVolume = pls.effectiveVolume * Math.clamped(pls.cbSoundLayers?.get(sound)?.volumeAdjustment ?? 1, 0, 1);
+  debug('fadeInVolume', fadeInVolume);
   const soundLayers = pls.cbSoundLayers ?? new Map<Sound, SoundLayerData>();
   // Default volume --- Only activate if this is the base sound;
   let fadeVolume = pls.sound === sound ? fadeInVolume : 0;
@@ -204,7 +209,9 @@ export const isLeadGM = function () {
 };
 
 export async function clearCrossbladeData(pls: CrossbladePlaylistSound) {
-  const flags = pls.data.flags[MODULE_ID] as Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore TODO: v10 type implementation for pls.flags
+  const flags = pls.flags[MODULE_ID] as Record<string, unknown>;
   await Promise.all(Array.from(Object.keys(flags)).map((flag) => pls.unsetFlag(MODULE_ID, flag)));
 }
 
@@ -239,7 +246,9 @@ export function getPlayingCustomEvents(options = { sort: false }) {
       playlist.sounds
         .filter((pls) => pls.playing)
         .map((pls: CrossbladePlaylistSound) =>
-          ((pls.data.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore TODO: v10 type implementation for pls.flags
+          ((pls.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
             .map((layer) => layer.events)
             .flat()
             .filter((event) => event[0] === 'CUSTOM')
@@ -277,7 +286,9 @@ export function getAllCustomEvents(options = { sort: false }) {
   const events = game.playlists?.contents
     .map((playlist) =>
       playlist.sounds.map((pls: CrossbladePlaylistSound) =>
-        ((pls.data.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore TODO: v10 type implementation for pls.flags
+        ((pls.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
           ?.map((layer) => layer.events)
           .flat()
           .filter((event) => event[0] === 'CUSTOM')

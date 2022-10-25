@@ -21,7 +21,9 @@ export function registerCriticalHooks() {
     const NEEDS_MIGRATION_VERSION = '1.0.7';
     const totalDocuments = game.playlists?.size ?? 0;
     if (!latestMigrationVersion && totalDocuments === 0)
-      return game.settings.set(MODULE_ID, 'moduleMigrationVersion', crossbladeModule.data.version);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore TODO: v10 type implementation for crossbladeModule.version
+      return game.settings.set(MODULE_ID, 'moduleMigrationVersion', crossbladeModule.version);
     const needsMigration = !latestMigrationVersion || isNewerVersion(NEEDS_MIGRATION_VERSION, latestMigrationVersion);
     if (!needsMigration) return;
 

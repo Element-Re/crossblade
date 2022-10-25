@@ -30,6 +30,7 @@ export function registerSettings(): void {
     scope: 'world',
     config: false,
     type: String,
+    default: '',
     onChange: async (value) => {
       if (game.user?.isGM) {
         if (value) log(game.i18n.format('CROSSBLADE.Settings.Events.Custom.SetTo', { value: value }));

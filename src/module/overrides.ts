@@ -112,7 +112,9 @@ namespace PlaylistSoundOverrides {
       // Conclude current playback
       const stopPromises: Promise<Sound | void>[] = [];
       for (const layerSound of layerSounds) {
-        if (fade && !this.data.pausedTime)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore TODO: v10 type implementation for this.pausedTime
+        if (fade && !this.pausedTime)
           stopPromises.push(
             layerSound.fade(0, { duration: fade }).then(() => {
               if (!this.playing) layerSound.stop();
@@ -126,22 +128,47 @@ namespace PlaylistSoundOverrides {
       for (const layerSound of layerSounds) {
         // Determine layer playback configuration
         const playback: Sound.PlayOptions = {
-          loop: this.data.repeat,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore TODO: v10 type implementation for this.repeat
+          loop: this.repeat,
           fade: fade,
         };
-        if (this.data.pausedTime && baseSound === layerSound) {
-          playback.offset = this.data.pausedTime;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore TODO: v10 type implementation for this.pausedTime
+        if (this.pausedTime && baseSound === layerSound) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore TODO: v10 type implementation for this.pausedTime
+          playback.offset = this.pausedTime;
         } else if (baseSound !== layerSound) {
           // Getters to ensure value is current for when accessed
-          Object.defineProperty(playback, 'offset', { get: () => this.sound?.currentTime });
+          Object.defineProperty(playback, 'offset', {
+            get: () => {
+              const offset = baseSound.currentTime;
+              debug('offset', offset);
+              return offset;
+            },
+          });
         }
-        Object.defineProperty(playback, 'volume', { get: () => getCrossfadeVolume(this, layerSound) });
+        Object.defineProperty(playback, 'volume', {
+          get: () => {
+            const crossfadeVolume = getCrossfadeVolume(this, layerSound);
+            debug('crossfadeVolume', crossfadeVolume);
+            return crossfadeVolume;
+          },
+        });
         const loadOrPlay = async () => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore TODO: v10 type implementation for game.audio.unlock
+          const unlock = game.audio.unlock as Promise<AudioContext>;
+          await unlock;
           await layerSound.loading;
+
           // Load and autoplay layer sound, play directly if already loaded and not playing, or just fade to the proper volume.
           if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
           // Keep layers playing together.
-          else if (!layerSound.playing || layerSound.loop != this.data.repeat) layerSound.play(playback);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore TODO: v10 type implementation for this.repeat
+          else if (!layerSound.playing || layerSound.loop != this.repeat) layerSound.play(playback);
           else layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
         };
 
@@ -191,7 +218,9 @@ namespace PlaylistSoundOverrides {
     const fade = this.fadeDuration;
     if (fade) {
       this._fadeIn(sound);
-      if (!this.data.repeat && Number.isFinite(sound.duration)) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore TODO: v10 type implementation for this.repeat
+      if (!this.repeat && Number.isFinite(sound.duration)) {
         sound.schedule(this._fadeOut.bind(this), Number(sound.duration) - fade / 1000);
       }
     }
@@ -272,7 +301,9 @@ namespace PlaylistDirectoryOverrides {
       if (sound && !sound.isOwner) {
         // Change volume in memory... which could change when the sound is updated
         // by an owner or otherwise refreshed (which should be what we want).
-        sound.data.volume = AudioHelper.inputToVolume($(slider).val() as number);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore TODO: v10 type implementation for this.volume
+        sound.volume = AudioHelper.inputToVolume($(slider).val() as number);
         sound.sync();
       }
     }
