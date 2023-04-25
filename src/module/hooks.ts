@@ -1,5 +1,5 @@
-import CrossbladeSoundConfig from './CrossbladeSoundConfig';
-import { CrossbladeModule, CrossbladePlaylistSound, DevModeApi } from './types';
+import CrossbladeSoundConfig from './CrossbladeSoundConfig.js';
+import { CrossbladeModule, CrossbladePlaylistSound, DevModeApi } from './types.js';
 import {
   CrossbladeController,
   debug,
@@ -9,7 +9,7 @@ import {
   getPlayingCustomEvents,
   getUniqueCrossbladeSounds,
   MODULE_ID,
-} from './utils';
+} from './utils.js';
 
 export function registerCriticalHooks() {
   Hooks.once('ready', async () => {
@@ -21,7 +21,7 @@ export function registerCriticalHooks() {
     const NEEDS_MIGRATION_VERSION = '1.0.7';
     const totalDocuments = game.playlists?.size ?? 0;
     if (!latestMigrationVersion && totalDocuments === 0)
-      return game.settings.set(MODULE_ID, 'moduleMigrationVersion', crossbladeModule.data.version);
+      return game.settings.set(MODULE_ID, 'moduleMigrationVersion', crossbladeModule.version);
     const needsMigration = !latestMigrationVersion || isNewerVersion(NEEDS_MIGRATION_VERSION, latestMigrationVersion);
     if (!needsMigration) return;
 
@@ -151,7 +151,9 @@ export function registerOptionalHooks() {
           if (uniqueSounds.size) {
             const crossbladeIcon = `<i class="crossblade-font-icon fa-fw" title="${game.i18n.format(
               'CROSSBLADE.Layers.Count',
-              { count: uniqueSounds.size },
+              {
+                count: uniqueSounds.size,
+              },
             )}"></i>`;
             $sound.find('.sound-name').append(crossbladeIcon);
           }

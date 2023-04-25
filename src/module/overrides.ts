@@ -1,6 +1,6 @@
-import CrossbladeSoundConfig from './CrossbladeSoundConfig';
-import { libWrapper } from './shim';
-import { CrossbladePlaylistSound, DevModeModuleData } from './types';
+import CrossbladeSoundConfig from './CrossbladeSoundConfig.js';
+import { libWrapper } from './shim.js';
+import { CrossbladePlaylistSound, DevModeModuleData } from './types.js';
 import {
   getCrossfadeVolume,
   generateCrossbladeSounds,
@@ -8,7 +8,7 @@ import {
   getUniqueCrossbladeSounds,
   clearCrossbladeData,
   MODULE_ID,
-} from './utils';
+} from './utils.js';
 
 export function registerCriticalOverrides() {
   // Right-click context menu for sounds
@@ -112,7 +112,7 @@ namespace PlaylistSoundOverrides {
       // Conclude current playback
       const stopPromises: Promise<Sound | void>[] = [];
       for (const layerSound of layerSounds) {
-        if (fade && !this.data.pausedTime)
+        if (fade && !this.pausedTime)
           stopPromises.push(
             layerSound.fade(0, { duration: fade }).then(() => {
               if (!this.playing) layerSound.stop();
@@ -126,11 +126,11 @@ namespace PlaylistSoundOverrides {
       for (const layerSound of layerSounds) {
         // Determine layer playback configuration
         const playback: Sound.PlayOptions = {
-          loop: this.data.repeat,
+          loop: this.repeat,
           fade: fade,
         };
-        if (this.data.pausedTime && baseSound === layerSound) {
-          playback.offset = this.data.pausedTime;
+        if (this.pausedTime && baseSound === layerSound) {
+          playback.offset = this.pausedTime;
         } else if (baseSound !== layerSound) {
           // Getters to ensure value is current for when accessed
           Object.defineProperty(playback, 'offset', { get: () => this.sound?.currentTime });
@@ -141,7 +141,7 @@ namespace PlaylistSoundOverrides {
           // Load and autoplay layer sound, play directly if already loaded and not playing, or just fade to the proper volume.
           if (!layerSound.loaded) layerSound.load({ autoplay: true, autoplayOptions: playback });
           // Keep layers playing together.
-          else if (!layerSound.playing || layerSound.loop != this.data.repeat) layerSound.play(playback);
+          else if (!layerSound.playing || layerSound.loop != this.repeat) layerSound.play(playback);
           else layerSound.fade(getCrossfadeVolume(this, layerSound), { duration: this.fadeDuration });
         };
 
@@ -191,7 +191,7 @@ namespace PlaylistSoundOverrides {
     const fade = this.fadeDuration;
     if (fade) {
       this._fadeIn(sound);
-      if (!this.data.repeat && Number.isFinite(sound.duration)) {
+      if (!this.repeat && Number.isFinite(sound.duration)) {
         sound.schedule(this._fadeOut.bind(this), Number(sound.duration) - fade / 1000);
       }
     }
@@ -272,7 +272,7 @@ namespace PlaylistDirectoryOverrides {
       if (sound && !sound.isOwner) {
         // Change volume in memory... which could change when the sound is updated
         // by an owner or otherwise refreshed (which should be what we want).
-        sound.data.volume = AudioHelper.inputToVolume($(slider).val() as number);
+        sound.volume = AudioHelper.inputToVolume($(slider).val() as number);
         sound.sync();
       }
     }
