@@ -1,7 +1,7 @@
 import { PlaylistSoundDataProperties } from '@league-of-foundry-developers/foundry-vtt-types/src/foundry/common/data/data.mjs/playlistSoundData';
 import { PropertiesToSource } from '@league-of-foundry-developers/foundry-vtt-types/src/types/helperTypes';
-import { CrossbladeModule } from './types';
-import { debug, log, MODULE_ID } from './utils';
+import { CrossbladeModule } from './types.js';
+import { debug, log, MODULE_ID } from './utils.js';
 
 /**
  * Perform a module migration for the entire World, applying migrations for Playlists and Compendium packs
@@ -11,7 +11,7 @@ import { debug, log, MODULE_ID } from './utils';
 export const migrateWorld = async function (): Promise<any> {
   const module = game.modules.get(MODULE_ID) as CrossbladeModule;
   if (!module) return;
-  const version = module.data.version;
+  const version = module.version;
   ui.notifications.info(game.i18n.format('CROSSBLADE.Migration.Begin', { version }), { permanent: true });
 
   // Migrate World PlaylistSounds

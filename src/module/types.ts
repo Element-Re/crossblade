@@ -1,6 +1,6 @@
 import { ModuleData } from '@league-of-foundry-developers/foundry-vtt-types/src/foundry/common/packages.mjs';
-import { migratePlaylistSoundData, migrateCompendium, migrateWorld } from './migrations';
-import { getPlayingCustomEvents, getCustomEvent, setCustomEvent, getAllCustomEvents } from './utils';
+import { migratePlaylistSoundData, migrateCompendium, migrateWorld } from './migrations.js';
+import { getPlayingCustomEvents, getCustomEvent, setCustomEvent, getAllCustomEvents } from './utils.js';
 
 export interface CrossbladeModule extends Game.ModuleData<ModuleData> {
   migrations: {

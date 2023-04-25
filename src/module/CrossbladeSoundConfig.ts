@@ -1,6 +1,6 @@
 import { ConfiguredDocumentClass } from '@league-of-foundry-developers/foundry-vtt-types/src/types/helperTypes';
-import { CrossbladeEventKey, CrossbladeFlags } from './types';
-import { CROSSBLADE_EVENTS, debug } from './utils';
+import { CrossbladeEventKey, CrossbladeFlags } from './types.js';
+import { CROSSBLADE_EVENTS, debug } from './utils.js';
 
 export default class CrossbladeSoundConfig<
   Options extends CrossbladeSoundConfig.Options = CrossbladeSoundConfig.Options,
@@ -23,7 +23,6 @@ export default class CrossbladeSoundConfig<
   async getData(options: Options) {
     const data = await super.getData(options);
     debug('getData', options, data);
-    data.data = this.object.data;
     data.crossbladeEvents = CROSSBLADE_EVENTS;
 
     debug('data', data);

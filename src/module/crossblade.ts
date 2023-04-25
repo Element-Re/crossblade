@@ -1,10 +1,10 @@
-import { registerSettings } from './settings';
-import { preloadTemplates, registerHandlebarsHelpers } from './handlebars';
-import { MODULE_ID, log, setCustomEvent, getCustomEvent, getPlayingCustomEvents, getAllCustomEvents } from './utils';
-import { CrossbladeModule } from './types';
-import { registerCriticalOverrides, registerOptionalOverrides } from './overrides';
-import { migratePlaylistSoundData, migrateCompendium, migrateWorld } from './migrations';
-import { registerCriticalHooks, registerOptionalHooks } from './hooks';
+import { registerSettings } from './settings.js';
+import { preloadTemplates, registerHandlebarsHelpers } from './handlebars.js';
+import { MODULE_ID, log, setCustomEvent, getCustomEvent, getPlayingCustomEvents, getAllCustomEvents } from './utils.js';
+import { CrossbladeModule } from './types.js';
+import { registerCriticalOverrides, registerOptionalOverrides } from './overrides.js';
+import { migratePlaylistSoundData, migrateCompendium, migrateWorld } from './migrations.js';
+import { registerCriticalHooks, registerOptionalHooks } from './hooks.js';
 
 // Initialize module
 Hooks.once('init', async () => {

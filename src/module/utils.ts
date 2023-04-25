@@ -6,7 +6,7 @@ import {
   DevModeModuleData,
   SoundLayerData,
   SoundLayerFlagData,
-} from './types';
+} from './types.js';
 
 export const CROSSBLADE_EVENTS: Record<CrossbladeEventKey, CrossbladeEvent> = {
   DEFAULT: {
@@ -55,7 +55,7 @@ export function inHelper(iterable: Iterable<any> | undefined | null, toCheck: an
 
 export function getCrossbladeSound(src: string, basedOn: PlaylistSound) {
   try {
-    if (!basedOn.id || !basedOn.data.path) return null;
+    if (!basedOn.id || !basedOn.path) return null;
     // Use the base sound if it matches the layer audio source, or create a new one.
     const sound = basedOn.sound?.src === src ? basedOn.sound : createCrossbladeSound.bind(basedOn)(src);
     return sound;
@@ -81,7 +81,7 @@ function _determineCrossbladeEvent(): string {
 
   if (combatPauseEvent && game.paused) return 'GAME: PAUSED';
   if (!combatEvents || !game.combat?.started) return game.paused ? 'GAME_PAUSED' : 'DEFAULT';
-  switch (game.combat?.combatant?.token?.data.disposition) {
+  switch (game.combat?.combatant?.token?.disposition) {
     case CONST.TOKEN_DISPOSITIONS.FRIENDLY:
       return 'COMBATANT: FRIENDLY';
     case CONST.TOKEN_DISPOSITIONS.NEUTRAL:
@@ -204,7 +204,7 @@ export const isLeadGM = function () {
 };
 
 export async function clearCrossbladeData(pls: CrossbladePlaylistSound) {
-  const flags = pls.data.flags[MODULE_ID] as Record<string, unknown>;
+  const flags = pls.flags[MODULE_ID] as Record<string, unknown>;
   await Promise.all(Array.from(Object.keys(flags)).map((flag) => pls.unsetFlag(MODULE_ID, flag)));
 }
 
@@ -222,15 +222,15 @@ export function debug(...args: unknown[]) {
 }
 
 export function getCustomEvent() {
-  return game.settings.get(MODULE_ID, 'customEvent') as string | undefined;
+  return game.settings.get(MODULE_ID, 'customEvent') as string;
 }
 
 export async function setCustomEvent(event?: string) {
   return await game.settings.set(MODULE_ID, 'customEvent', event?.trim() ?? '');
 }
 
-export function formatCustomEvent(customEvent: string | undefined) {
-  return customEvent ? `CUSTOM: ${customEvent.toUpperCase()}` : undefined;
+export function formatCustomEvent(customEvent: string) {
+  return customEvent ? `CUSTOM: ${customEvent.toUpperCase()}` : '';
 }
 
 export function getPlayingCustomEvents(options = { sort: false }) {
@@ -239,7 +239,7 @@ export function getPlayingCustomEvents(options = { sort: false }) {
       playlist.sounds
         .filter((pls) => pls.playing)
         .map((pls: CrossbladePlaylistSound) =>
-          ((pls.data.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
+          ((pls.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
             .map((layer) => layer.events)
             .flat()
             .filter((event) => event[0] === 'CUSTOM')
@@ -277,7 +277,7 @@ export function getAllCustomEvents(options = { sort: false }) {
   const events = game.playlists?.contents
     .map((playlist) =>
       playlist.sounds.map((pls: CrossbladePlaylistSound) =>
-        ((pls.data.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
+        ((pls.flags as CrossbladeFlags).crossblade?.soundLayers ?? [])
           ?.map((layer) => layer.events)
           .flat()
           .filter((event) => event[0] === 'CUSTOM')

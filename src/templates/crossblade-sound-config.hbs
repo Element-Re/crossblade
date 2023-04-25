@@ -10,7 +10,7 @@
         </a>
     </h4>
     <div id="soundLayers">
-        {{#each data.flags.crossblade.soundLayers}}
+        {{#each object.flags.crossblade.soundLayers}}
             {{> crossbladeSoundLayer index=@index baseVolume=../baseVolume crossbladeEvents=../crossbladeEvents}}
         {{/each}}
     </div>

@@ -1,9 +1,8 @@
 {
-  "name": "crossblade",
+  "id": "crossblade",
   "title": "Crossblade - Adaptive Music Crossfader",
   "description": "Enables the GM to configure adaptive music playlist sounds that crossfade between multiple audio layers in response to combat and more",
   "version": "This is auto replaced",
-  "author": "Element_Re",
   "authors": [
     {
       "name": "Element_Re",
@@ -13,8 +12,8 @@
       "reddit": "u/element-re"
     }
   ],
-  "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "9",
+  "minimumCoreVersion": "10",
+  "compatibleCoreVersion": "10",
   "scripts": [],
   "esmodules": ["module/crossblade.js"],
   "styles": ["styles/crossblade.css"],

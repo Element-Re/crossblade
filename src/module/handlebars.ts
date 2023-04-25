@@ -1,4 +1,4 @@
-import { inHelper, log } from './utils';
+import { inHelper, log } from './utils.js';
 
 export async function preloadTemplates(): Promise<Handlebars.TemplateDelegate[]> {
   log('Preloading templates...');
