@@ -13,8 +13,10 @@
       "reddit": "u/element-re"
     }
   ],
-  "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "9",
+  "compatibility": {
+    "minimum": "9",
+    "verified": "9"
+  },
   "scripts": [],
   "esmodules": ["module/crossblade.js"],
   "styles": ["styles/crossblade.css"],
@@ -23,14 +25,20 @@
       "name": "crossblade-macros",
       "label": "Crossblade Macros",
       "path": "./packs/crossblade-macros.db",
-      "entity": "Macro"
+      "type": "Macro",
+      "private": false,
+      "flags": {}
     }
   ],
-  "dependencies": [
-    {
-      "name": "lib-wrapper"
-    }
-  ],
+  "relationships": {
+    "requires": [
+      {
+          "id": "lib-wrapper",
+          "type": "module",
+          "compatibility": {}
+      }
+    ]
+  },
   "languages": [
     {
       "lang": "en",
